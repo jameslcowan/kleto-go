@@ -26,9 +26,10 @@ Before significant frontend, API, or middleware implementation:
 
 4. Implement persistence and API shapes **from that model**, then UI.
 
-## Gate (stop hook)
+## Gates
 
-If application paths change while `status` is `pending`, the stop loop fails until you confirm the model with the user and update `.cursor/data-model.json`.
+- **preToolUse (Write):** app-layer paths blocked while `status` is `pending`.
+- **stop hook:** if application paths changed in the last commit while `status` is `pending`, the loop fails until you confirm the model with the user and update `.cursor/data-model.json`.
 
 Application paths (typical): `src/`, `app/`, `api/`, `server/`, `prisma/`, `migrations/`, `internal/`, `cmd/` (not `.cursor/`, `scripts/`, `docs/` alone).
 

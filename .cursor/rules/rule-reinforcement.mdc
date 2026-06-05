@@ -25,8 +25,10 @@ Rules teach behavior; **hooks prove** it. One unified loop beats dozens of separ
 
 ## What tier B runs
 
-- **sessionStart:** `setup-cursor-autonomy.sh` + `verify-cursor-autonomy.sh` — silently; injects context only on failure.
-- **afterFileEdit + stop:** `scripts/refresh-auto-context.sh` → `.cursor/auto-context.md` (see `session-handoff.mdc`).
+- **sessionStart:** autonomy setup/verify; injects data-model excerpt (`build-context-snippet.py`).
+- **preToolUse (Write):** `data-first-pre-tool.sh` blocks app-layer writes when model pending.
+- **postToolUse (Write|Shell):** `inject-context.sh` adds data-model / notes to conversation.
+- **afterFileEdit + stop:** `refresh-auto-context.sh` → `.cursor/auto-context.md` (see `session-handoff.mdc`).
 - **beforeShellExecution:** `shell-guard.sh` then `allow-execution.sh` — deny destructive commands; then allow.
 
 ## Adding a new always-on rule

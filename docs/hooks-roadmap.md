@@ -9,8 +9,8 @@ Scalped patterns from community repos, adapted to kleto-go’s **one stop loop**
 | P0 | Shell guard on `beforeShellExecution` (deny destructive commands) | Hook A′ | **Done** | [cursor-agent-learning](https://github.com/wchen02/cursor-agent-learning), [endorlabs/cursor-hook-examples](https://github.com/endorlabs/cursor-hook-examples) |
 | P1 | Auto-context snapshot on `afterFileEdit` + `stop` | Hook B | **Done** | [cursor-setup-guide](https://github.com/Wade-O-Lution-Inc/cursor-setup-guide) |
 | P1b | `session-handoff` rule → read `.cursor/auto-context.md` | Rule C | **Done** | Same |
-| P2 | `preToolUse` / `postToolUse` inject data-model + notes | Hook B | Planned | [planning-with-files](https://github.com/OthmanAdi/planning-with-files) |
-| P3 | Skill `extend-stop-check` (add verify + checks.sh line) | Skill | Planned | [claude-code plugin-dev](https://github.com/anthropics/claude-code/tree/main/plugins/plugin-dev) |
+| P2 | `preToolUse` / `postToolUse` inject data-model + notes | Hook B | **Done** | [planning-with-files](https://github.com/OthmanAdi/planning-with-files) |
+| P3 | Skill `extend-stop-check` (add verify + checks.sh line) | Skill | **Done** | [claude-code plugin-dev](https://github.com/anthropics/claude-code/tree/main/plugins/plugin-dev) |
 | P4 | Optional `task_plan.md` + stop phase check (opt-in file) | Hook A | Planned | planning-with-files |
 | P5 | `subagentStop` parent followup when using Task tool | Hook | Planned | [cursor-handbook hooks](https://github.com/girijashankarj/cursor-handbook/blob/main/docs/cursor-guidelines/chapters/06-hooks.md) |
 | P6 | Optional `.cursor/decisions.json` gate (first-principles artifact) | Hook A | Planned | kleto-go (mirror data-first) |
@@ -44,18 +44,24 @@ chmod +x .cursor/hooks/shell-guard.sh .cursor/hooks/after-file-edit.sh scripts/r
 
 `shell-guard` is also in `.cursor/verify.json` (stop loop).
 
-## Hook event map (after P0+P1)
+## P2 — Context injection (done)
+
+- `sessionStart` → `build-context-snippet.py` via `session-reinforce.sh`
+- `preToolUse` (Write) → `data-first-pre-tool.sh` denies app writes when model pending
+- `postToolUse` (Write|Shell) → `inject-context.sh` adds `additional_context`
+
+## P3 — extend-stop-check skill (done)
+
+See `.cursor/skills/extend-stop-check/SKILL.md`.
+
+## Hook event map
 
 ```mermaid
 flowchart TB
-  SS[sessionStart: session-reinforce]
-  BSE[beforeShellExecution: shell-guard → allow-execution]
-  PT[preToolUse: allow-execution + inject all]
+  SS[sessionStart: reinforce + context snippet]
+  PT[preToolUse: data-first block → allow-execution]
+  POST[postToolUse: inject-context]
+  BSE[beforeShellExecution: shell-guard → allow]
   AFE[afterFileEdit: refresh auto-context]
   ST[stop: refresh + verify-stop]
-  SS --> Agent
-  BSE --> Agent
-  PT --> Agent
-  AFE --> Agent
-  ST --> Agent
 ```

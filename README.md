@@ -1,104 +1,87 @@
 # kleto-go
 
-Cursor app template — reusable starting point for new projects. Always-on rules plus **stop-hook reinforcement loops** so agents micro-commit, run with full access, and pass verification without asking.
+A **Cursor project template** that makes agents work like disciplined engineers: they ask about data and design, run scripts themselves, micro-commit, pass verification, and get **looped** by hooks until checks pass.
 
-## What's included
+Use it as a [GitHub template](https://github.com/jameslcowan/kleto-go) for every new app.
 
-| Rule / config | Purpose |
-|---------------|---------|
-| `micro-commits` | Auto-commit each step; one concern; small diffs |
-| `git-safety` | Safe git; micro-commit always; push only when asked |
-| `allowlist-config` | Valid `cli.json`; global `unrestricted`; why prompts happen |
-| `project-full-access` | Every `Shell` uses `required_permissions: ["all"]`; never ask |
-| `agent-workflow` | Template rules override conflicting global user rules |
-| `coding-principles` | Small diffs, match conventions |
-| `verify-before-done` | Run `.cursor/verify.json` commands before claiming done |
-| `first-principles` | Invariants, boundaries, failure modes; ask before assuming |
-| `data-first` | Ask user data model first; gate app-layer until `.cursor/data-model.json` confirmed |
-| `frontend-design` | UI files: distinctive aesthetics; `skills/frontend-design` (Anthropic-based) |
-| `agent-executes` | Run scripts yourself; still ask design/data/verification questions |
-| `rule-reinforcement` | Tiered loops — one stop hook, not one per rule |
-| `.cursor/cli.json` | Project tool allowlist (`permissions` only — see below) |
-| `.cursor/hooks/shell-guard.sh` | Deny destructive shell (force-push main, `reset --hard`, pipe-to-sh) |
-| `.cursor/hooks/allow-execution.sh` | IDE: auto-allow shell/MCP; inject `all` on Shell |
-| `.cursor/hooks/after-file-edit.sh` | Refresh `.cursor/auto-context.md` after edits |
-| `session-handoff` | Use auto-context when user asks handoff/compact |
-| `scripts/setup-cursor-autonomy.sh` | One-time: IDE `permissions.json` + cli-config + Run Everything |
-| `scripts/verify-cursor-autonomy.sh` | Verify all autonomy layers after setup |
-| `.cursor/verify.json` | Project test/lint commands for the stop hook |
-| `.cursor/hooks/verify-stop.sh` | Unified reinforcement loop (git, secrets, verify) |
+---
 
-Rules: [`.cursor/rules/`](.cursor/rules/) (`.mdc`, `alwaysApply: true`).
+## Quick start
 
-## Reinforcement architecture
+### 1. Create a project from this template
+
+GitHub → **Use this template** → create your repo → clone locally → open in Cursor.
+
+### 2. One-time machine setup (you or the agent)
+
+The agent runs this on `sessionStart`; you only need to do it once per machine if hooks are not trusted yet:
+
+```bash
+./scripts/setup-cursor-autonomy.sh
+```
+
+Then **fully quit and restart Cursor**. In **Settings → Agent**, choose **Run Everything** (not Use Allowlist). **Trust this workspace** so project hooks run.
+
+Verify:
+
+```bash
+./scripts/verify-cursor-autonomy.sh
+```
+
+### 3. Start building
+
+| Step | Who | What |
+|------|-----|------|
+| Reset data model | You or agent | Set `.cursor/data-model.json` → `"status": "pending"` |
+| Confirm domain | Agent asks you | Entities, relationships, sources of truth (`AskQuestion`) |
+| Record model | Agent | `"status": "confirmed"` + `summary` + `entities` |
+| Build | Agent | Persistence/API first, then UI (`frontend-design` on `*.tsx`, etc.) |
+
+The agent **commits as it goes**, **runs tests**, and the **stop hook loops** until git is clean and `verify.json` passes. It should **not** ask you to run template scripts.
+
+---
+
+## How it works (60 seconds)
 
 ```mermaid
 flowchart LR
-  A[Agent turn ends] --> B[verify-stop.sh]
-  B --> C{Checks}
-  C -->|dirty git| D[followup_message]
-  C -->|staged secrets| D
-  C -->|verify.json fail| D
-  C -->|all pass| E["{}" stop loop]
-  D --> F[Auto user message]
-  F --> A
+  R[Rules teach behavior] --> H[Hooks prove it]
+  H --> A[Agent turn ends]
+  A --> S[verify-stop.sh]
+  S -->|fail| L[Auto follow-up message]
+  L --> A
+  S -->|pass| OK[Done]
 ```
 
-| Check | Enforces |
-|-------|----------|
-| Git clean | `micro-commits`, `git-safety` |
-| Staged secrets scan | `git-safety` |
-| `verify.json` commands | `verify-before-done`, `coding-principles` (via tests/lint) |
-| Footer checklist | `project-full-access`, all always-on rules |
+**Three tiers** ([`rule-reinforcement.mdc`](.cursor/rules/rule-reinforcement.mdc)):
 
-Rules teach behavior; hooks **prove** it. Add testable policies as verify commands; add subjective policies as rules plus footer reminders.
+| Tier | When | Examples |
+|------|------|----------|
+| **A — stop** | Every completed turn | Git clean, secrets, tests, data-first gate |
+| **B — session / tools** | Session start, file edits, tools | Autonomy setup, auto-context, data-model injection |
+| **C — rules** | Always in context | First principles, coding style, frontend aesthetics |
 
-## Fix permission prompts (allowlist)
+**Rules** live in [`.cursor/rules/`](.cursor/rules/). **Proof** lives in [`.cursor/hooks/`](.cursor/hooks/) and [`.cursor/verify.json`](.cursor/verify.json).
 
-**Root causes:** (1) invalid project `cli.json` keys → file ignored; (2) missing `~/.cursor/permissions.json` (IDE allowlist); (3) `yoloEnableRunEverything: false` in IDE storage.
+---
 
-```bash
-./scripts/setup-cursor-autonomy.sh   # once per machine
-./scripts/verify-cursor-autonomy.sh  # after restart
+## Common workflows
+
+### New app from template
+
+1. Copy or template this repo.
+2. Edit `.cursor/data-model.json`:
+
+```json
+{
+  "status": "pending",
+  "summary": null,
+  "entities": []
+}
 ```
 
-| Layer | Store |
-|-------|--------|
-| IDE Auto-Run | `~/.cursor/permissions.json` → `approvalMode: unrestricted` |
-| IDE Run Everything | `state.vscdb` → `yoloEnableRunEverything: true` |
-| CLI | `~/.cursor/cli-config.json` → `approvalMode: unrestricted` |
-| Project | `.cursor/cli.json` → `permissions` only |
-| Hooks | `allow-execution.sh` + trusted workspace |
-
-Fully **quit and restart Cursor** after setup. In Settings → Agent, confirm **Run Everything** (not Use Allowlist).
-
-## No agent attribution on GitHub
-
-Cursor was adding `Co-authored-by: Cursor <cursoragent@cursor.com>` when `attributeCommitsToAgent` was enabled in `~/.cursor/cli-config.json`.
-
-```bash
-./scripts/setup-cursor-autonomy.sh          # sets attribution off
-./scripts/verify-cursor-autonomy.sh         # checks config + git history
-./scripts/strip-agent-coauthors-from-history.sh  # one-time history cleanup (no remotes)
-```
-
-Rule + skill: `no-agent-attribution`, `.cursor/skills/fix-agent-attribution/` — stop hook **auto-rewrites** polluted history when the tree is clean (loop), then verifies.
-
-## Agent executes (not you)
-
-`agent-executes` rule + `sessionStart`/`stop` hooks run `setup-cursor-autonomy.sh` and `verify-cursor-autonomy.sh` for you. Agents must not ask you to run template scripts.
-
-## Hooks roadmap
-
-Extended hook plan (P2–P6): [`docs/hooks-roadmap.md`](docs/hooks-roadmap.md). P0 shell guard and P1 auto-context are implemented.
-
-## Rule loops (feedback)
-
-Not every rule gets its own hook — see `rule-reinforcement.mdc` for tier A (stop), B (session/edit), C (rules only).
-
-## Configure verification
-
-Edit `.cursor/verify.json` when you add a stack:
+3. Tell the agent what you're building. It should ask data-model questions before writing under `src/`, `app/`, `api/`, etc.
+4. Add your stack to `.cursor/verify.json`:
 
 ```json
 {
@@ -109,41 +92,130 @@ Edit `.cursor/verify.json` when you add a stack:
 }
 ```
 
-## IDE setup (one-time)
+5. Optional: copy `.cursor/implementation-notes.md.example` → `.cursor/implementation-notes.md` for locked decisions.
 
-1. **Trust this workspace** — project hooks require it.
-2. **Auto-run / Run everything** — reduces approval prompts (with `.cursor/cli.json` for CLI).
+### Session handoff
 
-Reload hooks: save `hooks.json` or restart Cursor.
+Say **handoff**, **compact**, or **checkpoint**. The agent reads `.cursor/auto-context.md` (refreshed on every edit and stop) and produces a structured summary. See [`session-handoff.mdc`](.cursor/rules/session-handoff.mdc).
 
-## Data-first workflow
+### Add a new enforceable check
 
-1. Set `.cursor/data-model.json` → `"status": "pending"` for a new app.
-2. Agent **asks** how data is modeled (`AskQuestion`) — not optional for real domain work.
-3. After user confirms, set `"status": "confirmed"` with `summary` + `entities`.
-4. Build API/persistence, then UI (`frontend-design` skill on `*.tsx`, etc.).
+Use the skill **[`extend-stop-check`](.cursor/skills/extend-stop-check/SKILL.md)** — add to `verify.json` or `hooks/lib/checks.sh`, one footer line, micro-commit. **Never** add a second `stop` hook.
 
-Stop hook runs `./scripts/check-data-model.sh` via `verify.json`.
+### Build UI
 
-## Recommended rules to add per app
+Rules on `*.tsx`, `*.css`, etc. trigger [`frontend-design`](.cursor/skills/frontend-design/SKILL.md) (distinctive aesthetics, not generic AI layouts).
 
-| When | Rule idea | Loop pairing |
-|------|-----------|----------------|
-| Go / TS / Python app | `globs: **/*.{go,ts}` stack standards | `go test`, `eslint`, `ruff` in `verify.json` |
-| API service | `api-conventions.mdc` | contract tests or `curl` smoke in verify |
-| UI app | `ui-patterns.mdc` | `npm run build` + optional e2e |
-| Team handoff | `session-handoff.mdc` | tier B: `auto-context.md` refreshed on edit + stop |
-| PR flow | `pr-checklist.mdc` (not alwaysApply) | user-triggered; `gh pr checks` in verify when opening PRs |
-| Dependencies | `deps-bump.mdc` | lockfile + test command in verify |
+---
 
-Keep each rule file under ~50 lines, one concern. Update `rule_reinforcement_footer` in `hooks/lib/checks.sh` when you add a new **always-on** rule worth repeating in every loop.
+## What the agent will do
 
-## Use as a GitHub template
+| Will do | Won't do (unless you ask) |
+|---------|---------------------------|
+| Micro-commit each step | Ask "should I commit?" |
+| Run `verify.json`, setup, fix scripts | Ask you to run template scripts |
+| Ask data / design / verification questions | Delegate shell work to you |
+| Use `Shell` with full permissions | Block on allowlist prompts (when setup is correct) |
+| Pass stop hook before claiming done | Force-push, agent co-authors, commit secrets |
 
-1. Create a repo from this template.
-2. Add app code and fill `.cursor/verify.json`.
-3. Add stack-specific rules with `globs` where needed.
-4. Keep autonomy + reinforcement hooks unless you intentionally relax them.
+---
+
+## Hooks at a glance
+
+| Event | Script | Purpose |
+|-------|--------|---------|
+| `sessionStart` | `session-reinforce.sh` | Autonomy setup; inject data-model snippet |
+| `preToolUse` (Write) | `data-first-pre-tool.sh` | Block app writes if model not confirmed |
+| `preToolUse` | `allow-execution.sh` | Auto-allow tools; `Shell` gets `all` permissions |
+| `postToolUse` (Write\|Shell) | `inject-context.sh` | Remind data-model / notes in conversation |
+| `beforeShellExecution` | `shell-guard.sh` → `allow-execution.sh` | Deny destructive commands, then allow |
+| `afterFileEdit` | `after-file-edit.sh` | Refresh `.cursor/auto-context.md` |
+| `stop` | `verify-stop.sh` | Unified loop: git, secrets, verify, attribution |
+
+Config: [`.cursor/hooks.json`](.cursor/hooks.json). Future work: [`docs/hooks-roadmap.md`](docs/hooks-roadmap.md) (P4–P6).
+
+---
+
+## Rules at a glance
+
+| Rule | Purpose |
+|------|---------|
+| `data-first` | User confirms data model before app layers |
+| `first-principles` | Invariants, boundaries, failure modes; ask before assuming |
+| `frontend-design` | Distinctive UI when editing web files |
+| `micro-commits` / `git-safety` | Small commits, safe git, no secrets |
+| `agent-executes` | Agent runs scripts; still asks product questions |
+| `verify-before-done` | All `verify.json` commands must pass |
+| `session-handoff` | Use auto-context on handoff |
+| `rule-reinforcement` | One stop loop, tiered enforcement |
+
+Full list: [`.cursor/rules/`](.cursor/rules/).
+
+---
+
+## Troubleshooting
+
+### Permission prompts ("Allowlist", "Run command?")
+
+1. Invalid `.cursor/cli.json` keys → entire file ignored. This template uses **`permissions` only**.
+2. Run `./scripts/setup-cursor-autonomy.sh` and restart Cursor.
+3. Confirm **Run Everything** in Settings → Agent.
+4. Trust the workspace.
+
+Details: [`allowlist-config.mdc`](.cursor/rules/allowlist-config.mdc).
+
+### Agent keeps looping at end of turn
+
+The stop hook found a failing check (dirty git, tests, data-first, etc.). Read the auto follow-up message; the agent should fix and micro-commit. Checks: [`verify-stop.sh`](.cursor/hooks/verify-stop.sh), [`.cursor/verify.json`](.cursor/verify.json).
+
+### `Co-authored-by: Cursor` on commits
+
+```bash
+./scripts/setup-cursor-autonomy.sh
+./scripts/strip-agent-coauthors-from-history.sh   # one-time if history polluted
+```
+
+Stop hook auto-fixes when the tree is clean. Skill: [`fix-agent-attribution`](.cursor/skills/fix-agent-attribution/SKILL.md).
+
+### Write blocked to `src/` etc.
+
+`.cursor/data-model.json` is still `"pending"`. Confirm the domain model with the agent, then set `"status": "confirmed"`.
+
+---
+
+## Project layout
+
+```
+.cursor/
+  rules/           # Always-on and glob-scoped agent rules (.mdc)
+  skills/          # Workflows: frontend-design, extend-stop-check, …
+  hooks/           # Reinforcement scripts
+  hooks.json       # Hook registration
+  verify.json      # Commands run at stop (tests + template checks)
+  data-model.json  # Data-first gate state
+scripts/
+  setup-cursor-autonomy.sh
+  verify-cursor-autonomy.sh
+  refresh-auto-context.sh
+  check-data-model.sh
+docs/
+  hooks-roadmap.md
+```
+
+---
+
+## Customize per app
+
+| Need | Action |
+|------|--------|
+| Stack tests | Add commands to `.cursor/verify.json` |
+| Coding standards | Add `.cursor/rules/your-stack.mdc` with `globs` |
+| Enforceable policy | Skill [`extend-stop-check`](.cursor/skills/extend-stop-check/SKILL.md) |
+| Relax autonomy | Edit hooks/rules intentionally — default is strict |
+
+Keep each rule file short (one concern). Update `rule_reinforcement_footer` in [`hooks/lib/checks.sh`](.cursor/hooks/lib/checks.sh) for new always-on rules.
+
+---
 
 ## License
 

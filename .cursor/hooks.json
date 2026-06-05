@@ -9,7 +9,18 @@
     ],
     "preToolUse": [
       {
+        "command": ".cursor/hooks/data-first-pre-tool.sh",
+        "matcher": "Write"
+      },
+      {
         "command": ".cursor/hooks/allow-execution.sh"
+      }
+    ],
+    "postToolUse": [
+      {
+        "command": ".cursor/hooks/inject-context.sh",
+        "matcher": "Write|Shell",
+        "timeout": 15
       }
     ],
     "beforeShellExecution": [

@@ -14,6 +14,11 @@
       "name": "shell-guard",
       "run": "./scripts/test-shell-guard.sh",
       "timeout": 15
+    },
+    {
+      "name": "inject-context",
+      "run": "./scripts/test-inject-context.sh",
+      "timeout": 20
     }
   ]
 }

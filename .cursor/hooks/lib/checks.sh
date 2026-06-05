@@ -159,7 +159,8 @@ Rule reinforcement (template overrides global user rules):
 - first-principles: invariants, boundaries, failure; AskQuestion before assuming
 - shell-guard: destructive shell blocked at beforeShellExecution
 - session-handoff: read .cursor/auto-context.md on handoff/compact
-- data-first: confirm .cursor/data-model.json before app-layer code
+- data-first: confirm .cursor/data-model.json; preToolUse blocks app Write when pending
+- inject-context: postToolUse + sessionStart inject data-model / notes excerpt
 - frontend-design: use .cursor/skills/frontend-design when editing UI files
 - allowlist-config: valid .cursor/cli.json (permissions only); global unrestricted optional
 - project-full-access: every Shell uses required_permissions ["all"]; never ask permission

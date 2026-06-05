@@ -118,11 +118,14 @@ else
 fi
 
 # Hooks
-for f in .cursor/hooks.json .cursor/hooks/shell-guard.sh .cursor/hooks/allow-execution.sh \
-  .cursor/hooks/after-file-edit.sh .cursor/hooks/verify-stop.sh scripts/refresh-auto-context.sh; do
+for f in .cursor/hooks.json .cursor/hooks/shell-guard.sh .cursor/hooks/data-first-pre-tool.sh \
+  .cursor/hooks/inject-context.sh .cursor/hooks/allow-execution.sh .cursor/hooks/after-file-edit.sh \
+  .cursor/hooks/verify-stop.sh .cursor/hooks/lib/build-context-snippet.py \
+  scripts/refresh-auto-context.sh; do
   [[ -e "$f" ]] && ok "$f present" || { bad "missing $f"; }
 done
-for x in shell-guard.sh allow-execution.sh after-file-edit.sh verify-stop.sh; do
+for x in shell-guard.sh data-first-pre-tool.sh inject-context.sh allow-execution.sh \
+  after-file-edit.sh verify-stop.sh; do
   [[ -x ".cursor/hooks/$x" ]] && ok "$x executable" || bad "$x not executable"
 done
 [[ -x scripts/refresh-auto-context.sh ]] && ok "refresh-auto-context.sh executable" || bad "refresh-auto-context.sh not executable"

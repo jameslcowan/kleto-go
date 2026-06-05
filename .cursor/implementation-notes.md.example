@@ -1,0 +1,15 @@
+# Implementation notes (copy to implementation-notes.md)
+
+Durable decisions from `first-principles` / user confirmation. Agents read excerpts via hooks.
+
+## Scope
+
+- ...
+
+## Invariants
+
+- ...
+
+## Locked decisions
+
+- 2026-06-05: ...
