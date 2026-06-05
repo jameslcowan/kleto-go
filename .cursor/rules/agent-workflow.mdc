@@ -26,4 +26,4 @@ alwaysApply: true
 
 ## Template usage
 
-Keep always-on rules, `.cursor/cli.json`, and the micro-commit `stop` hook. Add stack rules under `.cursor/rules/` — one concern per file.
+Keep always-on rules, `.cursor/cli.json`, `.cursor/verify.json`, and the unified `verify-stop` hook. Add stack rules under `.cursor/rules/` — one concern per file; extend `hooks/lib/checks.sh` footer when adding enforceable policies.

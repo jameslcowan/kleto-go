@@ -1,6 +1,6 @@
 # kleto-go
 
-Cursor app template — reusable starting point for new projects. Ships with **always-on** agent rules and project config so agents micro-commit and run with full access without asking.
+Cursor app template — reusable starting point for new projects. Always-on rules plus **stop-hook reinforcement loops** so agents micro-commit, run with full access, and pass verification without asking.
 
 ## What's included
 
@@ -11,35 +11,76 @@ Cursor app template — reusable starting point for new projects. Ships with **a
 | `project-full-access` | Every `Shell` uses `required_permissions: ["all"]`; never ask |
 | `agent-workflow` | Template rules override conflicting global user rules |
 | `coding-principles` | Small diffs, match conventions |
+| `verify-before-done` | Run `.cursor/verify.json` commands before claiming done |
+| `rule-reinforcement` | How stop-hook loops enforce all template rules |
 | `.cursor/cli.json` | CLI: sandbox off, broad tool allowlist |
-| `.cursor/hooks.json` | `stop` hook loops until working tree is clean |
+| `.cursor/verify.json` | Project test/lint commands for the stop hook |
+| `.cursor/hooks/verify-stop.sh` | Unified reinforcement loop (git, secrets, verify) |
 
 Rules: [`.cursor/rules/`](.cursor/rules/) (`.mdc`, `alwaysApply: true`).
 
-## Why rules + hook + cli.json
+## Reinforcement architecture
 
-| Problem | Fix |
-|---------|-----|
-| Global user rule “only commit when asked” | `agent-workflow`: template rules win |
-| Agent asks “should I commit?” | `micro-commits` + `stop` hook follow-up |
-| Agent asks for sandbox permission | `project-full-access`: always pass `all` on `Shell` |
-| CLI still prompts every tool | `.cursor/cli.json` allowlist + sandbox disabled |
+```mermaid
+flowchart LR
+  A[Agent turn ends] --> B[verify-stop.sh]
+  B --> C{Checks}
+  C -->|dirty git| D[followup_message]
+  C -->|staged secrets| D
+  C -->|verify.json fail| D
+  C -->|all pass| E["{}" stop loop]
+  D --> F[Auto user message]
+  F --> A
+```
 
-## One-time setup (IDE)
+| Check | Enforces |
+|-------|----------|
+| Git clean | `micro-commits`, `git-safety` |
+| Staged secrets scan | `git-safety` |
+| `verify.json` commands | `verify-before-done`, `coding-principles` (via tests/lint) |
+| Footer checklist | `project-full-access`, all always-on rules |
 
-After clone, in **Cursor Settings → Agent** (wording may vary by version):
+Rules teach behavior; hooks **prove** it. Add testable policies as verify commands; add subjective policies as rules plus footer reminders.
 
-1. **Trust this workspace** — required for project hooks.
-2. **Auto-run / Run everything** — auto-approve agent tools (complements `.cursor/cli.json` for CLI).
+## Configure verification
 
-Reload hooks: save `.cursor/hooks.json` or restart Cursor.
+Edit `.cursor/verify.json` when you add a stack:
+
+```json
+{
+  "commands": [
+    { "name": "test", "run": "go test ./...", "timeout": 120 },
+    { "name": "lint", "run": "npm run lint", "optional": true }
+  ]
+}
+```
+
+## IDE setup (one-time)
+
+1. **Trust this workspace** — project hooks require it.
+2. **Auto-run / Run everything** — reduces approval prompts (with `.cursor/cli.json` for CLI).
+
+Reload hooks: save `hooks.json` or restart Cursor.
+
+## Recommended rules to add per app
+
+| When | Rule idea | Loop pairing |
+|------|-----------|----------------|
+| Go / TS / Python app | `globs: **/*.{go,ts}` stack standards | `go test`, `eslint`, `ruff` in `verify.json` |
+| API service | `api-conventions.mdc` | contract tests or `curl` smoke in verify |
+| UI app | `ui-patterns.mdc` | `npm run build` + optional e2e |
+| Team handoff | `session-handoff.mdc` (alwaysApply) | optional: stop hook reminder if transcript incomplete — subjective only |
+| PR flow | `pr-checklist.mdc` (not alwaysApply) | user-triggered; `gh pr checks` in verify when opening PRs |
+| Dependencies | `deps-bump.mdc` | lockfile + test command in verify |
+
+Keep each rule file under ~50 lines, one concern. Update `rule_reinforcement_footer` in `hooks/lib/checks.sh` when you add a new **always-on** rule worth repeating in every loop.
 
 ## Use as a GitHub template
 
 1. Create a repo from this template.
-2. Add app code, stack, CI.
-3. Add stack-specific rules (e.g. `globs: **/*.go`).
-4. Keep `cli.json`, hooks, and autonomy rules unless you intentionally relax them.
+2. Add app code and fill `.cursor/verify.json`.
+3. Add stack-specific rules with `globs` where needed.
+4. Keep autonomy + reinforcement hooks unless you intentionally relax them.
 
 ## License
 
