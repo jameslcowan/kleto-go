@@ -16,7 +16,11 @@ if [[ "$status" != "completed" ]]; then
   exit 0
 fi
 
+# Auto-repair agent Co-authored-by trailers and disable Cursor attribution (see fix-agent-attribution skill)
+fix_agent_attribution_history || true
+
 CHECK_ISSUES=()
+check_cli_attribution_config
 check_git_clean
 check_staged_secrets
 check_agent_attribution

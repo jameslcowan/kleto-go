@@ -1,4 +1,7 @@
 # Shared checks for stop-hook reinforcement. Source from verify-stop.sh.
+SCRIPT_DIR_CHECKS="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=agent-attribution.sh
+source "${SCRIPT_DIR_CHECKS}/agent-attribution.sh"
 
 check_git_clean() {
   if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
@@ -30,34 +33,48 @@ check_staged_secrets() {
   fi
 }
 
+check_cli_attribution_config() {
+  local cfg="${HOME}/.cursor/cli-config.json"
+  [[ -f "$cfg" ]] || return 0
+  local bad
+  bad=$(python3 - "$cfg" <<'PY'
+import json, sys
+d = json.load(open(sys.argv[1]))
+a = d.get("attribution") or {}
+if a.get("attributeCommitsToAgent") or a.get("attributePRsToAgent"):
+    print(json.dumps(a))
+    sys.exit(0)
+sys.exit(1)
+PY
+) || return 0
+  _issue "ATTRIBUTION_ON" \
+    "Cursor cli-config still attributes commits/PRs to agents." \
+    "Run: ./scripts/setup-cursor-autonomy.sh (or stop hook will auto-disable on next fix pass)." \
+    "$bad"
+}
+
 check_agent_attribution() {
   if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     return 0
   fi
-  local hits
-  hits=$(git log --format='%H %s' | python3 -c "
-import re, subprocess, sys
-pat = re.compile(r'^Co-authored-by:', re.I)
-agents = re.compile(
-    r'cursor|cursoragent|copilot|claude|anthropic|openai|github-actions|dependabot|\[bot\]',
-    re.I,
-)
-log = subprocess.run(['git', 'log', '-1', '--format=%H'], capture_output=True, text=True)
-head = (log.stdout or '').strip()
-if not head:
-    sys.exit(0)
-msg = subprocess.run(['git', 'log', '-1', '--format=%B', head], capture_output=True, text=True).stdout
-bad = [ln for ln in msg.splitlines() if pat.match(ln) and agents.search(ln)]
-if bad:
-    print(head[:12])
-    print('\n'.join(bad))
-" 2>/dev/null || true)
-  if [[ -n "$hits" ]]; then
-    _issue "AGENT_COAUTHOR" \
-      "HEAD commit has agent Co-authored-by (no-agent-attribution.mdc)." \
-      "Disable Cursor attribution in cli-config; run ./scripts/strip-agent-coauthors-from-history.sh if needed; amend or rewrite — never push agent trailers to GitHub." \
-      "$hits"
+  local count hits
+  count=$(agent_attribution_count 2>/dev/null || echo 0)
+  [[ "${count:-0}" -eq 0 ]] && return 0
+
+  hits=$(agent_attribution_scan | head -30)
+  local action="Stop hook could not auto-fix."
+  if [[ -n $(git status --porcelain) ]]; then
+    action="Commit or stash changes, then re-run — stop hook will auto-rewrite history when tree is clean."
+  elif git remote 2>/dev/null | grep -q .; then
+    action="Remotes exist — run ./scripts/strip-agent-coauthors-from-history.sh only if you will force-push intentionally."
+  else
+    action="Re-run agent turn — verify-stop should auto-fix on next pass when tree is clean."
   fi
+
+  _issue "AGENT_COAUTHOR" \
+    "${count} commit(s) have agent Co-authored-by trailers (no-agent-attribution.mdc)." \
+    "$action Never push to GitHub until ./scripts/verify-cursor-autonomy.sh passes." \
+    "$hits"
 }
 
 check_project_verify() {
@@ -103,18 +120,15 @@ PY
 ) || return 0
 
   if [[ -n "$results" ]]; then
-    while IFS= read -r line; do
-      [[ -z "$line" ]] && continue
-      local name code snippet
-      name="${line%%|*}"
-      rest="${line#*|}"
-      code="${rest%%|*}"
-      snippet="${rest#*|}"
-      _issue "VERIFY_FAIL" \
-        "${name} failed (${code}) — .cursor/rules/verify-before-done.mdc" \
-        "Fix failures, micro-commit, re-run the verify command." \
-        "$snippet"
-    done <<< "$results"
+    local name code snippet
+    name="${results%%|*}"
+    rest="${results#*|}"
+    code="${rest%%|*}"
+    snippet="${rest#*|}"
+    _issue "VERIFY_FAIL" \
+      "${name} failed (${code}) — .cursor/rules/verify-before-done.mdc" \
+      "Fix failures, micro-commit, re-run the verify command." \
+      "$snippet"
   fi
 }
 
@@ -131,7 +145,7 @@ Rule reinforcement (template overrides global user rules):
 - project-full-access: every Shell uses required_permissions ["all"]; never ask permission
 - micro-commits: one concern per commit; working tree clean before stop
 - git-safety: no secrets; no agent Co-authored-by; no force-push unless user asked
-- no-agent-attribution: attributeCommitsToAgent false; human-only commits
+- no-agent-attribution: auto-fix agent trailers in history when possible; never push dirty attribution
 - coding-principles: minimal diff; match conventions
 - verify-before-done: all .cursor/verify.json commands must pass
 EOF
