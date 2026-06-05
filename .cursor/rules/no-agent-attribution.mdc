@@ -1,5 +1,5 @@
 ---
-description: Never attribute or co-author git commits/PRs to Cursor or any AI agent
+description: Never attribute commits to agents; stop-hook auto-fixes polluted history
 alwaysApply: true
 ---
 
@@ -7,32 +7,30 @@ alwaysApply: true
 
 All git commits and PRs are **human-only**. Never add agent attribution.
 
-## Forbidden in commits
+## Forbidden
 
-- `Co-authored-by: Cursor <cursoragent@cursor.com>` or any Cursor/agent trailer
+- `Co-authored-by: Cursor <cursoragent@cursor.com>` or any agent/bot trailer
 - `git commit --trailer` for agent co-authors
-- `Signed-off-by` / `Assisted-by` naming agents, bots, or Copilot
+- Cursor `attributeCommitsToAgent` / `attributePRsToAgent` (must be `false`)
 
-Author/committer must remain the human user only.
+## Stop-hook loop (automatic fix)
 
-## Cursor settings
+On every agent turn end, `verify-stop.sh` **before** other checks:
 
-Global `~/.cursor/cli-config.json` must have:
+1. Disables agent attribution in `~/.cursor/cli-config.json` if re-enabled
+2. If any commit has agent `Co-authored-by` trailers and tree is clean with no remotes → **rewrites history** (amend HEAD or filter-branch)
+3. If still failing (dirty tree / remotes) → `followup_message` with `AGENT_COAUTHOR` — agent must unblock, then loop retries
 
-```json
-"attribution": {
-  "attributeCommitsToAgent": false,
-  "attributePRsToAgent": false
-}
+Read skill: `.cursor/skills/fix-agent-attribution/SKILL.md`
+
+## Before push to GitHub
+
+```bash
+./scripts/verify-cursor-autonomy.sh
 ```
 
-Run `./scripts/setup-cursor-autonomy.sh` after Cursor updates reset this.
+Must pass: attribution off, **zero** agent trailers in full `git log`.
 
-## Enforcement
+## Never ask
 
-- `verify-cursor-autonomy.sh` checks config and git history
-- `verify-stop` hook flags commits with agent `Co-authored-by` trailers
-
-## PRs
-
-Do not enable "attribute PR to agent" in Cursor. PR descriptions must not credit agents as co-authors.
+Do not ask to push while attribution check fails. Fix first via the loop or `./scripts/strip-agent-coauthors-from-history.sh`.
