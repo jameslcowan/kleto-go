@@ -1,48 +1,52 @@
 ---
-description: Fix allowlist traps — valid cli.json, global unrestricted, hooks auto-allow
+description: Three-layer Cursor autonomy — permissions.json, cli-config, Run Everything
 alwaysApply: true
 ---
 
-# Allowlist configuration
+# Allowlist configuration (three layers)
 
-Permission prompts usually mean **config was ignored**, not that the user must approve each command.
+IDE allowlist prompts are **not** fixed by project `.cursor/cli.json` alone. Cursor uses separate stores:
 
-## Project `.cursor/cli.json` (schema-critical)
+| Layer | File / store | Purpose |
+|-------|----------------|---------|
+| **IDE Composer** | `~/.cursor/permissions.json` | `approvalMode`: `unrestricted` \| `allowlist` \| `manual` |
+| **IDE Composer** | `state.vscdb` → `composerState.yoloEnableRunEverything` | Run Everything toggle |
+| **CLI agent** | `~/.cursor/cli-config.json` | `approvalMode` + `permissions.allow` |
+| **Project** | `.cursor/cli.json` | **`permissions` only** — invalid keys reject entire file |
+| **Hooks** | `allow-execution.sh` | Auto-allow shell/MCP; inject `required_permissions: ["all"]` |
 
-Project config accepts **only** `permissions` — not `sandbox`, not `approvalMode`.
+## Setup (required once per machine)
 
-Invalid JSON or extra keys → **entire file rejected** → global `~/.cursor/cli-config.json` wins (often `approvalMode: "allowlist"` with a tiny allow list like `Shell(ls)`).
+From repo root:
 
-This template ships a valid allow list:
+```bash
+./scripts/setup-cursor-autonomy.sh
+./scripts/verify-cursor-autonomy.sh
+```
 
-- `Shell(**)`, `Read(**)`, `Write(**)`, …, `Mcp(**)`
+Then **fully quit and restart Cursor** (not reload window).
 
-After clone, run `cursor-agent about` from the repo root. If you see `Invalid project config`, fix `.cursor/cli.json` before any agent work.
+## Project `.cursor/cli.json`
 
-## Global CLI config (one-time per machine)
-
-`approvalMode` and `sandbox` live in **`~/.cursor/cli-config.json`**, not project `cli.json`.
-
-For zero prompts on every project, set globally:
+Valid example — **no** `sandbox`, **no** `approvalMode`:
 
 ```json
-"approvalMode": "unrestricted",
-"permissions": {
-  "allow": ["Shell(**)", "Read(**)", "Write(**)", "Mcp(**)"],
-  "deny": []
+{
+  "permissions": {
+    "allow": ["Shell(**)", "Read(**)", "Write(**)", "Mcp(**)"],
+    "deny": []
+  }
 }
 ```
 
-Or run: `scripts/setup-global-cursor-permissions.sh` (merges safely; backs up first).
+Verify: `cursor-agent about` must not print `Invalid project config`.
 
-Valid `approvalMode` values: `"allowlist"` | `"unrestricted"`. `--yolo` / `--force` = unrestricted.
+## If prompts persist
 
-## IDE hooks (this repo)
-
-`allow-execution.sh` returns `permission: allow` for `beforeShellExecution`, `beforeMCPExecution`, and `preToolUse` (Shell gets `required_permissions: ["all"]` injected).
-
-Requires a **trusted workspace**.
+1. Cursor Settings → Agent → Auto-Run → **Run Everything** (not Use Allowlist).
+2. Re-run `./scripts/setup-cursor-autonomy.sh`.
+3. Confirm trusted workspace (hooks require it).
 
 ## Agent behavior
 
-Even with config fixed, pass `required_permissions: ["all"]` on every `Shell` call. Never ask the user to approve tools in chat.
+Pass `required_permissions: ["all"]` on every `Shell`. Never ask the user to approve tools in chat.
