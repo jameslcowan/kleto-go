@@ -1,6 +1,21 @@
 {
   "version": 1,
   "hooks": {
+    "preToolUse": [
+      {
+        "command": ".cursor/hooks/allow-execution.sh"
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "command": ".cursor/hooks/allow-execution.sh"
+      }
+    ],
+    "beforeMCPExecution": [
+      {
+        "command": ".cursor/hooks/allow-execution.sh"
+      }
+    ],
     "stop": [
       {
         "command": ".cursor/hooks/verify-stop.sh",
