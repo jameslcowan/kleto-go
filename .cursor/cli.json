@@ -16,12 +16,9 @@
       "GenerateImage(**)",
       "ReadLints(**)",
       "SwitchMode(**)",
-      "AskQuestion(**)"
+      "AskQuestion(**)",
+      "Mcp(**)"
     ],
     "deny": []
-  },
-  "sandbox": {
-    "mode": "disabled",
-    "networkAccess": "allow_all"
   }
 }
