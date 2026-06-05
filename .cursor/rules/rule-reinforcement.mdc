@@ -1,32 +1,43 @@
 ---
-description: Stop-hook loops reinforce all template rules — respond to follow-ups without asking
+description: Stop-hook loops reinforce rules; tiered enforcement — not every rule needs its own hook
 alwaysApply: true
 ---
 
 # Rule reinforcement loops
 
-Template rules are enforced twice: **always-on rules** (model context) and **stop-hook loops** (deterministic).
+Rules teach behavior; **hooks prove** it. One unified loop beats dozens of separate hooks.
 
-## How loops work
+## Three enforcement tiers
 
-1. Agent turn completes → `verify-stop.sh` runs.
-2. **Auto-fix** agent `Co-authored-by` trailers if present (clean tree, no remotes).
-3. Checks: cli attribution off, uncommitted git, staged secrets, agent trailers gone, `.cursor/verify.json` commands.
-4. On failure → `followup_message` is auto-submitted (up to `loop_limit` in `hooks.json`).
-5. Agent fixes issues **without asking** permission or whether to commit.
-6. When all checks pass → hook returns `{}` → turn can end.
+| Tier | Mechanism | Best for |
+|------|-----------|----------|
+| **A — stop loop** | `verify-stop.sh` on every turn end | Git clean, secrets, agent trailers, `verify.json` |
+| **B — session start** | `session-reinforce.sh` | Setup/verify autonomy once per conversation |
+| **C — rules only** | Always-on `.mdc` + footer reminder | Subjective quality (naming, architecture) |
+
+**Do not** add a separate `stop` hook per rule — cost, noise, and loop_limit exhaustion.
+
+## What the stop loop runs today
+
+1. Auto-fix agent `Co-authored-by` + disable attribution config
+2. `check_cli_attribution_config`, `check_git_clean`, `check_staged_secrets`, `check_agent_attribution`
+3. Commands in `.cursor/verify.json` (stack tests; attribution count)
+
+## What session start runs
+
+`setup-cursor-autonomy.sh` + `verify-cursor-autonomy.sh` — silently; injects context only on failure.
+
+## Adding a new always-on rule
+
+1. Write `.cursor/rules/your-rule.mdc`
+2. If **machine-checkable** → add to `hooks/lib/checks.sh` or `.cursor/verify.json`
+3. Add one line to `rule_reinforcement_footer` in `checks.sh`
+4. If needs a script → agent runs it (`agent-executes.mdc`), do not ask the user
 
 ## On follow-up messages
 
-Treat stop-hook output as a hard gate, not a suggestion:
+Hard gate. `Shell` with `["all"]`. Micro-commit. Fix yourself. No “should I run verify?”
 
-- Use `Shell` with `required_permissions: ["all"]`.
-- Micro-commit each fix step.
-- For `AGENT_COAUTHOR`: clear working tree so the hook can rewrite history, or run `./scripts/strip-agent-coauthors-from-history.sh`.
-- Re-run `./scripts/verify-cursor-autonomy.sh` before any push.
-- Do not ask “should I continue?” — continue until checks pass.
+## Feedback: should every rule have its own loop?
 
-## Adding checks
-
-- **Verify commands** — edit `.cursor/verify.json` (include `./scripts/verify-cursor-autonomy.sh`).
-- **New rule files** — add always-on `.mdc` and list them in `hooks/lib/checks.sh` (`rule_reinforcement_footer`).
+**No.** Use tier A only when a check is objective and cheap. Subjective rules stay tier C; over-looping causes slow turns and follow-up fatigue. This template centralizes tier A in `verify-stop.sh` plus tier B at session start.

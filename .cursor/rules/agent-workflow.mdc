@@ -17,6 +17,7 @@ alwaysApply: true
 ## Execution
 
 - Match project conventions.
+- **Run** setup/verify/scripts yourself (`agent-executes`) — never ask the user to run them.
 - Plan micro-commit steps before multi-file edits; **commit after each step without asking**.
 - Run linters/tests after substantive changes when appropriate.
 

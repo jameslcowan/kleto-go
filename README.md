@@ -77,6 +77,14 @@ Cursor was adding `Co-authored-by: Cursor <cursoragent@cursor.com>` when `attrib
 
 Rule + skill: `no-agent-attribution`, `.cursor/skills/fix-agent-attribution/` — stop hook **auto-rewrites** polluted history when the tree is clean (loop), then verifies.
 
+## Agent executes (not you)
+
+`agent-executes` rule + `sessionStart`/`stop` hooks run `setup-cursor-autonomy.sh` and `verify-cursor-autonomy.sh` for you. Agents must not ask you to run template scripts.
+
+## Rule loops (feedback)
+
+Not every rule gets its own hook — see `rule-reinforcement.mdc` for tier A (stop), B (session), C (rules only).
+
 ## Configure verification
 
 Edit `.cursor/verify.json` when you add a stack:
