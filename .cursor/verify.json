@@ -1,3 +1,9 @@
 {
-  "commands": []
+  "commands": [
+    {
+      "name": "cursor-autonomy",
+      "run": "./scripts/verify-cursor-autonomy.sh",
+      "timeout": 60
+    }
+  ]
 }

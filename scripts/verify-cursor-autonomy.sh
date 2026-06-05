@@ -3,10 +3,10 @@
 set -euo pipefail
 
 FAIL=0
-ok() { echo "OK  $*"; }
+ok() { echo "OK  $*" >&2; }
 bad() { echo "FAIL $*"; FAIL=1; }
 
-echo "=== Cursor autonomy verification ==="
+echo "=== Cursor autonomy verification ===" >&2
 
 # Project cli.json (schema: permissions only)
 if [[ -f .cursor/cli.json ]]; then
@@ -29,7 +29,7 @@ mode = p.get("approvalMode")
 if mode != "unrestricted":
     print(f"FAIL ~/.cursor/permissions.json approvalMode={mode!r} (need unrestricted)")
     sys.exit(1)
-print("OK  ~/.cursor/permissions.json approvalMode=unrestricted")
+print("OK  ~/.cursor/permissions.json approvalMode=unrestricted", file=sys.stderr)
 PY
   [[ $? -eq 0 ]] || FAIL=1
 else
@@ -53,7 +53,7 @@ attr = d.get("attribution") or {}
 if attr.get("attributeCommitsToAgent") or attr.get("attributePRsToAgent"):
     print(f"FAIL cli-config attribution enabled: {attr}")
     sys.exit(1)
-print("OK  ~/.cursor/cli-config.json unrestricted + attribution off")
+print("OK  ~/.cursor/cli-config.json unrestricted + attribution off", file=sys.stderr)
 PY
   [[ $? -eq 0 ]] || FAIL=1
 else
@@ -79,7 +79,7 @@ if bad:
     if len(bad) > 5:
         print('...')
     sys.exit(1)
-print('OK  git history has no agent Co-authored-by trailers')
+print('OK  git history has no agent Co-authored-by trailers', file=sys.stderr)
 " 2>/dev/null)
   if [[ $? -eq 0 ]]; then
     ok "git history clean of agent co-authors"
@@ -110,7 +110,7 @@ agent = next((m for m in (cs.get("modes4") or []) if m.get("id") == "agent"), No
 if not agent or not agent.get("fullAutoRun"):
     print("FAIL agent mode fullAutoRun is false")
     sys.exit(1)
-print("OK  IDE composer Run Everything enabled in state.vscdb")
+print("OK  IDE composer Run Everything enabled in state.vscdb", file=sys.stderr)
 PY
   [[ $? -eq 0 ]] || FAIL=1
 else
@@ -124,10 +124,11 @@ done
 [[ -x .cursor/hooks/allow-execution.sh ]] && ok "allow-execution.sh executable" || bad "allow-execution.sh not executable"
 [[ -x .cursor/hooks/verify-stop.sh ]] && ok "verify-stop.sh executable" || bad "verify-stop.sh not executable"
 
-echo ""
+echo "" >&2
 if [[ $FAIL -eq 0 ]]; then
-  echo "All checks passed."
+  echo "All checks passed." >&2
+  exit 0
 else
-  echo "Some checks failed. Run: ./scripts/setup-cursor-autonomy.sh"
+  echo "Some checks failed. Run: ./scripts/setup-cursor-autonomy.sh" >&2
   exit 1
 fi
