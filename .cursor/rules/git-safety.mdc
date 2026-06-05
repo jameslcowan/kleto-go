@@ -8,6 +8,8 @@ alwaysApply: true
 ## Commits
 
 - **Always micro-commit** per the micro-commits rule — never ask the user for permission to commit.
+- **Never** add `Co-authored-by` (or any trailer) attributing Cursor, Copilot, Claude, bots, or other agents — see `no-agent-attribution`.
+- Never use `git commit --trailer` for agent attribution.
 - Never commit files that likely contain secrets (`.env`, credentials, keys, tokens).
 - Never skip hooks (`--no-verify`, `--no-gpg-sign`) unless the user explicitly requests it.
 
