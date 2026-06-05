@@ -28,3 +28,5 @@ out/
 
 # Cursor local (optional — keep rules in repo)
 .cursor/*.local
+.cursor/cli.json.bak
+.cursor/cli.json.test
