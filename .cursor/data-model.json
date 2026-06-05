@@ -1,0 +1,7 @@
+{
+  "status": "confirmed",
+  "note": "kleto-go is a meta-template repo with no application domain. Reset to pending when starting a real app from this template.",
+  "summary": null,
+  "entities": [],
+  "confirmed_at": null
+}

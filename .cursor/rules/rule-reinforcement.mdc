@@ -21,7 +21,7 @@ Rules teach behavior; **hooks prove** it. One unified loop beats dozens of separ
 
 1. Auto-fix agent `Co-authored-by` + disable attribution config
 2. `check_cli_attribution_config`, `check_git_clean`, `check_staged_secrets`, `check_agent_attribution`
-3. Commands in `.cursor/verify.json` (stack tests; attribution count)
+3. Commands in `.cursor/verify.json` (attribution, data-first gate, stack tests)
 
 ## What session start runs
 

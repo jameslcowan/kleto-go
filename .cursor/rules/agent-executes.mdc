@@ -26,11 +26,19 @@ Forbidden:
 - “Should I commit?” / “Want me to push?”
 - “I need permission to…”
 
-## Exceptions (may ask)
+## Do ask the user (required)
+
+- **Data modeling** — entities, relationships, sources of truth (`data-first`)
+- **Implementation verification** — confirm assumptions before irreversible work (`systems-engineering`)
+- **Frontend direction** — brand, audience, aesthetic when building UI (`frontend-design`)
+- Product/architecture choices between valid options
+
+Use `AskQuestion` with concrete options. This is not delegating shell work.
+
+## Exceptions (may ask, not required)
 
 - Irreversible **push** or **force-push** they did not request
 - Credentials, 2FA, or UI-only settings you cannot change via files/API
-- Product choice between multiple valid architectures
 
 ## Loops enforce this
 

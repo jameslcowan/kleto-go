@@ -13,7 +13,11 @@ Cursor app template — reusable starting point for new projects. Always-on rule
 | `agent-workflow` | Template rules override conflicting global user rules |
 | `coding-principles` | Small diffs, match conventions |
 | `verify-before-done` | Run `.cursor/verify.json` commands before claiming done |
-| `rule-reinforcement` | How stop-hook loops enforce all template rules |
+| `systems-engineering` | Requirements, interfaces; verify implementation via questions |
+| `data-first` | Ask user data model first; gate app-layer until `.cursor/data-model.json` confirmed |
+| `frontend-design` | UI files: distinctive aesthetics; `skills/frontend-design` (Anthropic-based) |
+| `agent-executes` | Run scripts yourself; still ask design/data/verification questions |
+| `rule-reinforcement` | Tiered loops — one stop hook, not one per rule |
 | `.cursor/cli.json` | Project tool allowlist (`permissions` only — see below) |
 | `.cursor/hooks/allow-execution.sh` | IDE: auto-allow shell/MCP; inject `all` on Shell |
 | `scripts/setup-cursor-autonomy.sh` | One-time: IDE `permissions.json` + cli-config + Run Everything |
@@ -104,6 +108,15 @@ Edit `.cursor/verify.json` when you add a stack:
 2. **Auto-run / Run everything** — reduces approval prompts (with `.cursor/cli.json` for CLI).
 
 Reload hooks: save `hooks.json` or restart Cursor.
+
+## Data-first workflow
+
+1. Set `.cursor/data-model.json` → `"status": "pending"` for a new app.
+2. Agent **asks** how data is modeled (`AskQuestion`) — not optional for real domain work.
+3. After user confirms, set `"status": "confirmed"` with `summary` + `entities`.
+4. Build API/persistence, then UI (`frontend-design` skill on `*.tsx`, etc.).
+
+Stop hook runs `./scripts/check-data-model.sh` via `verify.json`.
 
 ## Recommended rules to add per app
 

@@ -21,6 +21,7 @@ fix_agent_attribution_history || true
 
 CHECK_ISSUES=()
 check_cli_attribution_config
+check_data_first
 check_git_clean
 check_staged_secrets
 check_agent_attribution

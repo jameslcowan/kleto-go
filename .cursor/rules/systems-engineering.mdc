@@ -1,0 +1,40 @@
+---
+description: Systems engineering — requirements, interfaces, verify implementation via questions
+alwaysApply: true
+---
+
+# Systems engineering
+
+Build like a system, not a pile of features.
+
+## Before implementation
+
+1. **Problem & scope** — who uses it, success criteria, out-of-scope items.
+2. **Interfaces** — APIs, events, files, UI boundaries; inputs/outputs and failure modes.
+3. **Data** — follow `data-first` (user confirms model before app layers).
+4. **Verification plan** — what tests/probes prove each requirement.
+
+## Verify implementation (ask questions)
+
+**Asking the user is required** when assumptions affect correctness — this is not “asking them to run commands” (`agent-executes`).
+
+Use `AskQuestion` (or a tight written checklist) to confirm:
+
+- Data model and migrations match their intent
+- Auth, tenancy, and permission boundaries
+- Integration contracts (webhooks, third parties, idempotency)
+- Non-functional targets (latency, retention, compliance)
+- UI/UX direction before large frontend work (`frontend-design` skill)
+
+Document answers in commit messages or `.cursor/implementation-notes.md` when the decision is durable.
+
+## During implementation
+
+- Smallest change that satisfies the verified requirement
+- One concern per micro-commit
+- Traceability: requirement → code → test in `verify.json`
+
+## After implementation
+
+- Run verification yourself (`verify.json`, tests) — do not ask the user to run scripts
+- Summarize what was verified vs what still needs product sign-off

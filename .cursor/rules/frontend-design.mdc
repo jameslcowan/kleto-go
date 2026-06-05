@@ -1,0 +1,26 @@
+---
+description: Distinctive production-grade frontend — avoid generic AI aesthetics; use frontend-design skill
+globs: "**/*.{tsx,jsx,vue,css,scss,html,astro,svelte}"
+alwaysApply: false
+---
+
+# Frontend design
+
+When building UI, follow `.cursor/skills/frontend-design/SKILL.md` (adapted from [Anthropic frontend-design](https://github.com/anthropics/claude-code/blob/main/plugins/frontend-design/skills/frontend-design/SKILL.md)).
+
+## Before coding UI
+
+1. **Data-first** — domain model confirmed; UI reflects real entities and states.
+2. **Design direction** — pick a bold aesthetic (tone, typography, color, motion); do not default to generic AI layouts.
+3. **Ask the user** if brand, audience, or accessibility constraints are unknown.
+
+## Implementation
+
+- Production-grade, accessible, cohesive
+- No cookie-cutter purple gradients, Inter/Roboto-only stacks, or identical layouts every time
+- Match complexity to vision (maximalist vs minimal)
+
+## Verification
+
+- Run build/lint/test from `.cursor/verify.json` yourself
+- Stop hook enforces git/verify rules; this rule enforces design discipline when UI files are in context

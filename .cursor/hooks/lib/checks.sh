@@ -33,6 +33,18 @@ check_staged_secrets() {
   fi
 }
 
+check_data_first() {
+  local script="scripts/check-data-model.sh"
+  [[ -x "$script" ]] || return 0
+  local out
+  out=$("$script" 2>&1) || {
+    _issue "DATA_FIRST" \
+      "Data model not confirmed (.cursor/rules/data-first.mdc)." \
+      "Ask the user how data will be modeled. Update .cursor/data-model.json to status confirmed, then implement FE/API/middleware." \
+      "$out"
+  }
+}
+
 check_cli_attribution_config() {
   local cfg="${HOME}/.cursor/cli-config.json"
   [[ -f "$cfg" ]] || return 0
@@ -143,7 +155,10 @@ rule_reinforcement_footer() {
   local loop_count="${1:-0}"
   cat <<'EOF'
 Rule reinforcement (template overrides global user rules):
-- agent-executes: run scripts and fixes yourself; never ask the user to run them
+- agent-executes: run scripts yourself; ask user for design/data/verification questions
+- systems-engineering: requirements, interfaces, verify via AskQuestion
+- data-first: confirm .cursor/data-model.json before app-layer code
+- frontend-design: use .cursor/skills/frontend-design when editing UI files
 - allowlist-config: valid .cursor/cli.json (permissions only); global unrestricted optional
 - project-full-access: every Shell uses required_permissions ["all"]; never ask permission
 - micro-commits: one concern per commit; working tree clean before stop

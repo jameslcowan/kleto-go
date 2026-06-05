@@ -1,0 +1,42 @@
+---
+description: Data-first — confirm data model with user before frontend or middle-stack work
+alwaysApply: true
+---
+
+# Data-first
+
+Most projects model **data before** UI, APIs, jobs, or infra wiring. Stack choices flow from the data model, not the reverse.
+
+## When starting real application work
+
+Before significant frontend, API, or middleware implementation:
+
+1. **Ask the user** how data will be modeled (entities, relationships, lifecycle, sources of truth).
+2. Use `AskQuestion` with concrete options (SQL vs document, tenancy, soft-delete, audit fields, etc.).
+3. Record the agreed model in `.cursor/data-model.json`:
+
+```json
+{
+  "status": "confirmed",
+  "summary": "One paragraph of the domain model",
+  "entities": ["User", "Order", "LineItem"],
+  "confirmed_at": "2026-06-05"
+}
+```
+
+4. Implement persistence and API shapes **from that model**, then UI.
+
+## Gate (stop hook)
+
+If application paths change while `status` is `pending`, the stop loop fails until you confirm the model with the user and update `.cursor/data-model.json`.
+
+Application paths (typical): `src/`, `app/`, `api/`, `server/`, `prisma/`, `migrations/`, `internal/`, `cmd/` (not `.cursor/`, `scripts/`, `docs/` alone).
+
+## Template repos
+
+kleto-go meta-files may stay `confirmed` with a note. New apps from this template: set `"status": "pending"` on day one.
+
+## Exceptions
+
+- Pure docs/tooling-only changes in the template itself
+- User explicitly waives data-first for a spike — record `"status": "waived"` and reason in `summary`
