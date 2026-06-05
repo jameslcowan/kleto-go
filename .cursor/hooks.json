@@ -1,6 +1,12 @@
 {
   "version": 1,
   "hooks": {
+    "sessionStart": [
+      {
+        "command": ".cursor/hooks/session-reinforce.sh",
+        "timeout": 120
+      }
+    ],
     "preToolUse": [
       {
         "command": ".cursor/hooks/allow-execution.sh"
