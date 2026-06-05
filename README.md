@@ -1,31 +1,46 @@
 # kleto-go
 
-Cursor app template — reusable starting point for new projects. Ships with **always-on** agent rules so every session gets the same baseline behavior.
+Cursor app template — reusable starting point for new projects. Ships with **always-on** agent rules and project config so agents micro-commit and run with full access without asking.
 
 ## What's included
 
-| Rule | Purpose |
-|------|---------|
-| `micro-commits` | Atomic commits; one concern, minimal diff, friendly to AI context |
-| `git-safety` | Safe git/PR habits; no force-push, secrets, or surprise commits |
-| `coding-principles` | Small diffs, match conventions, meaningful tests only |
-| `agent-workflow` | Investigate with tools, respect skills and user intent |
+| Rule / config | Purpose |
+|---------------|---------|
+| `micro-commits` | Auto-commit each step; one concern; small diffs |
+| `git-safety` | Safe git; micro-commit always; push only when asked |
+| `project-full-access` | Every `Shell` uses `required_permissions: ["all"]`; never ask |
+| `agent-workflow` | Template rules override conflicting global user rules |
+| `coding-principles` | Small diffs, match conventions |
+| `.cursor/cli.json` | CLI: sandbox off, broad tool allowlist |
+| `.cursor/hooks.json` | `stop` hook loops until working tree is clean |
 
-Rules live in [`.cursor/rules/`](.cursor/rules/) as `.mdc` files with `alwaysApply: true`.
+Rules: [`.cursor/rules/`](.cursor/rules/) (`.mdc`, `alwaysApply: true`).
+
+## Why rules + hook + cli.json
+
+| Problem | Fix |
+|---------|-----|
+| Global user rule “only commit when asked” | `agent-workflow`: template rules win |
+| Agent asks “should I commit?” | `micro-commits` + `stop` hook follow-up |
+| Agent asks for sandbox permission | `project-full-access`: always pass `all` on `Shell` |
+| CLI still prompts every tool | `.cursor/cli.json` allowlist + sandbox disabled |
+
+## One-time setup (IDE)
+
+After clone, in **Cursor Settings → Agent** (wording may vary by version):
+
+1. **Trust this workspace** — required for project hooks.
+2. **Auto-run / Run everything** — auto-approve agent tools (complements `.cursor/cli.json` for CLI).
+
+Reload hooks: save `.cursor/hooks.json` or restart Cursor.
 
 ## Use as a GitHub template
 
-1. Create a new repository from this template (or clone and rename).
-2. Add your app code, stack, and CI.
-3. Add project-specific rules in `.cursor/rules/` (file globs or extra always-on rules).
-4. Optionally copy user-level rules from your Cursor settings into project rules for team consistency.
-
-## Customizing
-
-- **One concern per rule file** — keep each rule short and actionable.
-- **Micro-commits** — tighten or relax file-count guidance per team; keep "one logical unit per commit" as the default.
-- **Stack rules** — add e.g. `globs: **/*.go` or `**/*.tsx` for language/framework conventions.
+1. Create a repo from this template.
+2. Add app code, stack, CI.
+3. Add stack-specific rules (e.g. `globs: **/*.go`).
+4. Keep `cli.json`, hooks, and autonomy rules unless you intentionally relax them.
 
 ## License
 
-Add a license when you publish the template (e.g. MIT).
+Add a license when you publish (e.g. MIT).
