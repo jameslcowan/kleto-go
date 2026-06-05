@@ -7,6 +7,10 @@ alwaysApply: true
 
 Real environment. Agents operate with **full permissions** in this repo. Never ask the user for approval to run tools, elevate access, or commit.
 
+## Config
+
+See **allowlist-config** — invalid `.cursor/cli.json` causes global allowlist (`Shell(ls)` only) to apply. Hooks in this repo auto-allow execution when the workspace is trusted.
+
 ## Shell tool (mandatory)
 
 On **every** `Shell` call, pass:

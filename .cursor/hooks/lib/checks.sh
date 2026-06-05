@@ -97,6 +97,7 @@ rule_reinforcement_footer() {
   local loop_count="${1:-0}"
   cat <<'EOF'
 Rule reinforcement (template overrides global user rules):
+- allowlist-config: valid .cursor/cli.json (permissions only); global unrestricted optional
 - project-full-access: every Shell uses required_permissions ["all"]; never ask permission
 - micro-commits: one concern per commit; working tree clean before stop
 - git-safety: no secrets in commits; no force-push unless user asked
