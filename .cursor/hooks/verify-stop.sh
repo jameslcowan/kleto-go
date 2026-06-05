@@ -16,6 +16,11 @@ if [[ "$status" != "completed" ]]; then
   exit 0
 fi
 
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+if [[ -x "$ROOT/scripts/refresh-auto-context.sh" ]]; then
+  "$ROOT/scripts/refresh-auto-context.sh" >/dev/null 2>&1 || true
+fi
+
 # Auto-repair agent Co-authored-by trailers and disable Cursor attribution (see fix-agent-attribution skill)
 fix_agent_attribution_history || true
 

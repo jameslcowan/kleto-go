@@ -19,7 +19,10 @@ Cursor app template — reusable starting point for new projects. Always-on rule
 | `agent-executes` | Run scripts yourself; still ask design/data/verification questions |
 | `rule-reinforcement` | Tiered loops — one stop hook, not one per rule |
 | `.cursor/cli.json` | Project tool allowlist (`permissions` only — see below) |
+| `.cursor/hooks/shell-guard.sh` | Deny destructive shell (force-push main, `reset --hard`, pipe-to-sh) |
 | `.cursor/hooks/allow-execution.sh` | IDE: auto-allow shell/MCP; inject `all` on Shell |
+| `.cursor/hooks/after-file-edit.sh` | Refresh `.cursor/auto-context.md` after edits |
+| `session-handoff` | Use auto-context when user asks handoff/compact |
 | `scripts/setup-cursor-autonomy.sh` | One-time: IDE `permissions.json` + cli-config + Run Everything |
 | `scripts/verify-cursor-autonomy.sh` | Verify all autonomy layers after setup |
 | `.cursor/verify.json` | Project test/lint commands for the stop hook |
@@ -85,9 +88,13 @@ Rule + skill: `no-agent-attribution`, `.cursor/skills/fix-agent-attribution/` �
 
 `agent-executes` rule + `sessionStart`/`stop` hooks run `setup-cursor-autonomy.sh` and `verify-cursor-autonomy.sh` for you. Agents must not ask you to run template scripts.
 
+## Hooks roadmap
+
+Extended hook plan (P2–P6): [`docs/hooks-roadmap.md`](docs/hooks-roadmap.md). P0 shell guard and P1 auto-context are implemented.
+
 ## Rule loops (feedback)
 
-Not every rule gets its own hook — see `rule-reinforcement.mdc` for tier A (stop), B (session), C (rules only).
+Not every rule gets its own hook — see `rule-reinforcement.mdc` for tier A (stop), B (session/edit), C (rules only).
 
 ## Configure verification
 
@@ -125,7 +132,7 @@ Stop hook runs `./scripts/check-data-model.sh` via `verify.json`.
 | Go / TS / Python app | `globs: **/*.{go,ts}` stack standards | `go test`, `eslint`, `ruff` in `verify.json` |
 | API service | `api-conventions.mdc` | contract tests or `curl` smoke in verify |
 | UI app | `ui-patterns.mdc` | `npm run build` + optional e2e |
-| Team handoff | `session-handoff.mdc` (alwaysApply) | optional: stop hook reminder if transcript incomplete — subjective only |
+| Team handoff | `session-handoff.mdc` | tier B: `auto-context.md` refreshed on edit + stop |
 | PR flow | `pr-checklist.mdc` (not alwaysApply) | user-triggered; `gh pr checks` in verify when opening PRs |
 | Dependencies | `deps-bump.mdc` | lockfile + test command in verify |
 

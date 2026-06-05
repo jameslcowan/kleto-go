@@ -15,7 +15,7 @@ alwaysApply: true
 
 ## Forbidden unless explicitly requested
 
-- `git push --force` (especially to `main` / `master`)
+- `git push --force` (especially to `main` / `master`) — also blocked by `shell-guard.sh` hook
 - `git reset --hard` and other irreversible history rewrites
 - `git commit --amend` unless: user asked for amend, HEAD is your unpushed commit, and the prior commit succeeded without hook rejections
 - Updating `git config`

@@ -12,7 +12,7 @@ Rules teach behavior; **hooks prove** it. One unified loop beats dozens of separ
 | Tier | Mechanism | Best for |
 |------|-----------|----------|
 | **A — stop loop** | `verify-stop.sh` on every turn end | Git clean, secrets, agent trailers, `verify.json` |
-| **B — session start** | `session-reinforce.sh` | Setup/verify autonomy once per conversation |
+| **B — session / edit** | `session-reinforce.sh`, `after-file-edit.sh`, refresh on `stop` | Autonomy setup; `.cursor/auto-context.md` handoff snapshot |
 | **C — rules only** | Always-on `.mdc` + footer reminder | Subjective quality (naming, architecture) |
 
 **Do not** add a separate `stop` hook per rule — cost, noise, and loop_limit exhaustion.
@@ -23,9 +23,11 @@ Rules teach behavior; **hooks prove** it. One unified loop beats dozens of separ
 2. `check_cli_attribution_config`, `check_git_clean`, `check_staged_secrets`, `check_agent_attribution`
 3. Commands in `.cursor/verify.json` (attribution, data-first gate, stack tests)
 
-## What session start runs
+## What tier B runs
 
-`setup-cursor-autonomy.sh` + `verify-cursor-autonomy.sh` — silently; injects context only on failure.
+- **sessionStart:** `setup-cursor-autonomy.sh` + `verify-cursor-autonomy.sh` — silently; injects context only on failure.
+- **afterFileEdit + stop:** `scripts/refresh-auto-context.sh` → `.cursor/auto-context.md` (see `session-handoff.mdc`).
+- **beforeShellExecution:** `shell-guard.sh` then `allow-execution.sh` — deny destructive commands; then allow.
 
 ## Adding a new always-on rule
 

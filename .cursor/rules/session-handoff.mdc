@@ -1,0 +1,24 @@
+---
+description: Session handoff — use .cursor/auto-context.md when user asks to compact or hand off
+alwaysApply: true
+---
+
+# Session handoff
+
+`.cursor/auto-context.md` is refreshed on every file edit (`afterFileEdit`) and each completed agent turn (`stop` hook).
+
+When the user says **handoff**, **compact**, **checkpoint**, **resume context**, or similar:
+
+1. Read `.cursor/auto-context.md` first (do not ask them to paste git status).
+2. Produce a structured summary:
+   - **Goal**
+   - **Current state** (branch, HEAD, dirty files)
+   - **Files that matter**
+   - **Decisions locked in** (from `implementation-notes.md` or recent commits)
+   - **Open issues**
+   - **Next exact steps**
+   - **Resume prompt** (one paragraph they can paste into a new chat)
+
+3. Optionally update `.cursor/implementation-notes.md` with durable decisions (`first-principles`).
+
+This rule is subjective (tier C); refresh is tier B via hooks.

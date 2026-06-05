@@ -14,7 +14,16 @@
     ],
     "beforeShellExecution": [
       {
+        "command": ".cursor/hooks/shell-guard.sh"
+      },
+      {
         "command": ".cursor/hooks/allow-execution.sh"
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": ".cursor/hooks/after-file-edit.sh",
+        "timeout": 30
       }
     ],
     "beforeMCPExecution": [

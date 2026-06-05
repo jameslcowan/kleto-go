@@ -118,11 +118,14 @@ else
 fi
 
 # Hooks
-for f in .cursor/hooks.json .cursor/hooks/allow-execution.sh .cursor/hooks/verify-stop.sh; do
+for f in .cursor/hooks.json .cursor/hooks/shell-guard.sh .cursor/hooks/allow-execution.sh \
+  .cursor/hooks/after-file-edit.sh .cursor/hooks/verify-stop.sh scripts/refresh-auto-context.sh; do
   [[ -e "$f" ]] && ok "$f present" || { bad "missing $f"; }
 done
-[[ -x .cursor/hooks/allow-execution.sh ]] && ok "allow-execution.sh executable" || bad "allow-execution.sh not executable"
-[[ -x .cursor/hooks/verify-stop.sh ]] && ok "verify-stop.sh executable" || bad "verify-stop.sh not executable"
+for x in shell-guard.sh allow-execution.sh after-file-edit.sh verify-stop.sh; do
+  [[ -x ".cursor/hooks/$x" ]] && ok "$x executable" || bad "$x not executable"
+done
+[[ -x scripts/refresh-auto-context.sh ]] && ok "refresh-auto-context.sh executable" || bad "refresh-auto-context.sh not executable"
 
 echo "" >&2
 if [[ $FAIL -eq 0 ]]; then

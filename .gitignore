@@ -27,6 +27,7 @@ out/
 .cache/
 
 # Cursor local (optional — keep rules in repo)
+.cursor/auto-context.md
 .cursor/*.local
 .cursor/cli.json.bak
 .cursor/cli.json.test

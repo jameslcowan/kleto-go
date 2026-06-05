@@ -157,6 +157,8 @@ rule_reinforcement_footer() {
 Rule reinforcement (template overrides global user rules):
 - agent-executes: run scripts yourself; ask user for design/data/verification questions
 - first-principles: invariants, boundaries, failure; AskQuestion before assuming
+- shell-guard: destructive shell blocked at beforeShellExecution
+- session-handoff: read .cursor/auto-context.md on handoff/compact
 - data-first: confirm .cursor/data-model.json before app-layer code
 - frontend-design: use .cursor/skills/frontend-design when editing UI files
 - allowlist-config: valid .cursor/cli.json (permissions only); global unrestricted optional

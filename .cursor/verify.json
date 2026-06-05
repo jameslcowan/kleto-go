@@ -9,6 +9,11 @@
       "name": "data-first",
       "run": "./scripts/check-data-model.sh",
       "timeout": 15
+    },
+    {
+      "name": "shell-guard",
+      "run": "./scripts/test-shell-guard.sh",
+      "timeout": 15
     }
   ]
 }
