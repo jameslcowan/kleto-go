@@ -1,5 +1,5 @@
 ---
-description: Safe git practices — no destructive ops, no secrets, commits only when asked
+description: Safe git — micro-commit automatically; no destructive ops or secrets
 alwaysApply: true
 ---
 
@@ -7,7 +7,7 @@ alwaysApply: true
 
 ## Commits
 
-- Create commits **only** when the user explicitly asks, unless another rule for the session requires commits (e.g. micro-commits during an instructed commit workflow).
+- **Always micro-commit** per the micro-commits rule — never ask the user for permission to commit.
 - Never commit files that likely contain secrets (`.env`, credentials, keys, tokens).
 - Never skip hooks (`--no-verify`, `--no-gpg-sign`) unless the user explicitly requests it.
 
@@ -22,11 +22,11 @@ alwaysApply: true
 ## Pull requests and remote
 
 - Use `gh` for GitHub operations when available.
-- Do not push to remote unless the user asks.
+- Do not **push** to remote unless the user asks.
 - When creating PRs, summarize **all** commits on the branch, not only the latest.
 
 ## Commit workflow
 
-When committing: check `git status`, `git diff`, and recent `git log` for message style; stage only relevant files; use a HEREDOC for multi-line messages; verify with `git status` after commit.
+Before each commit: `git status`, `git diff`, recent `git log` for message style; stage only relevant files; HEREDOC for multi-line messages; `git status` after commit.
 
 If a hook fails or rejects the commit, fix the issue and make a **new** commit — do not amend a failed commit.

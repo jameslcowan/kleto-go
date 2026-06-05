@@ -1,15 +1,15 @@
 ---
-description: Atomic micro-commits — one concern per commit, minimal diffs for AI context
+description: Atomic micro-commits — auto-commit each step; never ask permission to commit
 alwaysApply: true
 ---
 
 # Micro-commits
 
-Every change must land as **granular micro-commits**. Small commits keep git history and agent context windows usable across models and sessions.
+Every change lands as **granular micro-commits**. Do not ask the user whether to commit — commit automatically after each micro-step.
 
 ## One concern per commit
 
-Each commit must represent exactly **one** logical unit of work:
+Each commit is exactly **one** logical unit:
 
 - A single bug fix
 - One function or method added or changed
@@ -17,43 +17,45 @@ Each commit must represent exactly **one** logical unit of work:
 - One dependency add or bump
 - One test case or one test file
 
-Never combine unrelated work (e.g. feature + refactor + unrelated cleanup) in one commit.
+Never combine unrelated work in one commit.
 
 ## Keep diffs small
 
-- Prefer **one to three files** per commit when possible.
-- If a change must touch more files, split into a **sequence** of commits (types → implementation → tests → wiring).
-- Avoid drive-by edits in files you are not committing for that step.
+- Prefer **one to three files** per commit.
+- Split larger work into a **sequence** (types → implementation → tests → wiring).
+- No drive-by edits outside the current micro-step.
 
-## Commit cadence during agent work
+## Commit cadence (mandatory)
 
-When implementing a multi-step task:
+After every micro-step:
 
-1. Complete one micro-step.
-2. Stage only files for that step.
-3. Commit with a message that describes **only** that step.
-4. Repeat — do not accumulate a large uncommitted diff.
+1. Complete the step.
+2. `git status` and `git diff` — stage only files for this step.
+3. Commit immediately with a message describing **only** this step.
+4. Verify with `git status` (clean before moving on).
 
-Natural breakpoints: after scaffolding, after core logic, after tests, after integration.
+Do not end a turn with uncommitted changes unless the step is genuinely blocked (e.g. hook failure you are fixing next). Do not accumulate a large working tree diff.
+
+Natural breakpoints: scaffolding, core logic, tests, integration, docs for that feature.
 
 ## Commit messages
 
-- One short subject line (imperative, ≤72 chars).
-- Optional body only if the *why* is not obvious from the subject.
-- Match the repo’s existing message style when examples exist.
+- Imperative subject, ≤72 chars.
+- Optional body only when *why* is non-obvious.
+- Match recent `git log` style when examples exist.
 
-## When the user has not asked to commit
+## Push and PRs
 
-Do not create commits unless the user requests them **or** an active rule/session explicitly requires micro-commits for that task. When commits are requested, still follow micro-commit granularity — never one giant commit for a whole feature.
+Micro-commits are local by default. **Push** and **open PRs** only when the user asks (see git-safety).
 
 ## Examples
 
 ```
-# ✅ GOOD — three commits for one small feature
+# ✅ GOOD
 fix(auth): return 401 when token is expired
 feat(auth): add JWT expiry check in middleware
 test(auth): cover expired token in middleware_test.go
 
-# ❌ BAD — one commit mixing concerns
+# ❌ BAD
 feat(auth): add expiry check, refactor user store, update README
 ```
