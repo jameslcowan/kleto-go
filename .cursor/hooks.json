@@ -3,7 +3,7 @@
   "hooks": {
     "stop": [
       {
-        "command": ".cursor/hooks/micro-commit-stop.sh",
+        "command": ".cursor/hooks/verify-stop.sh",
         "loop_limit": 10
       }
     ]
