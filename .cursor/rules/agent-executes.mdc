@@ -29,7 +29,7 @@ Forbidden:
 ## Do ask the user (required)
 
 - **Data modeling** — entities, relationships, sources of truth (`data-first`)
-- **Implementation verification** — confirm assumptions before irreversible work (`systems-engineering`)
+- **First principles** — invariants, boundaries, failure modes; `AskQuestion` before irreversible work (`first-principles`)
 - **Frontend direction** — brand, audience, aesthetic when building UI (`frontend-design`)
 - Product/architecture choices between valid options
 

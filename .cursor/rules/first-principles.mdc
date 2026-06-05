@@ -1,0 +1,39 @@
+---
+description: First principles — invariants, boundaries, failure modes; ask before assuming
+alwaysApply: true
+---
+
+# First principles
+
+Derive design from what must be true, not from familiar stack patterns. Before non-trivial application work, state briefly (in chat or `.cursor/implementation-notes.md`):
+
+1. **Invariants** — What must always hold? (e.g. totals reconcile, tenant isolation, idempotent writes.)
+2. **Constraints** — What are we optimizing for or trading off? (latency, cost, compliance, operability.)
+3. **Boundaries** — Minimal parts and their contracts (APIs, events, files, UI); inputs, outputs, ownership.
+4. **Failure** — How each boundary fails; how we detect, surface, and recover.
+5. **Evidence** — What proves each invariant? (tests in `verify.json`, probes, user confirmation.)
+
+## Data and scope
+
+- **Data** — follow `data-first`; invariants often live in `.cursor/data-model.json`.
+- **Scope** — who uses it, success criteria, explicit out-of-scope before large builds.
+
+## Ask the user (required)
+
+If any of the above is not derivable from the repo + confirmed `data-model.json`, use `AskQuestion` with concrete options. This is not delegating shell work (`agent-executes`).
+
+Ask when touching or assuming:
+
+- Auth, sessions, tenancy, permission boundaries
+- External integrations (webhooks, payments, third parties, idempotency)
+- Deletes, retention, PII, compliance
+- Non-functional targets (SLAs, rate limits, audit trails)
+- UI/UX direction before large frontend work (`frontend-design`)
+
+Record durable decisions in commit messages or `.cursor/implementation-notes.md`.
+
+## What this rule does not repeat
+
+- Running tests/scripts — `verify-before-done`, stop hook
+- Smallest change / micro-commits — `coding-principles`, `micro-commits`
+- Data model gate — `data-first` + `check-data-model.sh`

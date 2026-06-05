@@ -13,7 +13,7 @@ Cursor app template — reusable starting point for new projects. Always-on rule
 | `agent-workflow` | Template rules override conflicting global user rules |
 | `coding-principles` | Small diffs, match conventions |
 | `verify-before-done` | Run `.cursor/verify.json` commands before claiming done |
-| `systems-engineering` | Requirements, interfaces; verify implementation via questions |
+| `first-principles` | Invariants, boundaries, failure modes; ask before assuming |
 | `data-first` | Ask user data model first; gate app-layer until `.cursor/data-model.json` confirmed |
 | `frontend-design` | UI files: distinctive aesthetics; `skills/frontend-design` (Anthropic-based) |
 | `agent-executes` | Run scripts yourself; still ask design/data/verification questions |

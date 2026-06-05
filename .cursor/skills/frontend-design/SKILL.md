@@ -14,7 +14,7 @@ Upstream inspiration: [anthropics/claude-code frontend-design skill](https://git
 ## Prerequisites
 
 - **Data-first** — `.cursor/data-model.json` confirmed; UI states map to real entities
-- **Systems engineering** — requirements and verification questions answered with the user
+- **First principles** — invariants and scope confirmed; ask user when brand/constraints unknown
 
 ## Design thinking (before code)
 
