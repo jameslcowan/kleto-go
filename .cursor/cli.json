@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Shell(**)",
+      "Read(**)",
+      "Write(**)",
+      "StrReplace(**)",
+      "Delete(**)",
+      "Grep(**)",
+      "Glob(**)",
+      "EditNotebook(**)",
+      "TodoWrite(**)",
+      "WebFetch(**)",
+      "WebSearch(**)",
+      "Task(**)",
+      "GenerateImage(**)",
+      "ReadLints(**)",
+      "SwitchMode(**)",
+      "AskQuestion(**)"
+    ],
+    "deny": []
+  },
+  "sandbox": {
+    "mode": "disabled",
+    "networkAccess": "allow_all"
+  }
+}
