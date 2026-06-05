@@ -49,11 +49,44 @@ allow = d.get("permissions", {}).get("allow") or []
 if not any("Shell(**)" in a for a in allow):
     print("FAIL cli-config missing Shell(**) in permissions.allow")
     sys.exit(1)
-print("OK  ~/.cursor/cli-config.json unrestricted + Shell(**)")
+attr = d.get("attribution") or {}
+if attr.get("attributeCommitsToAgent") or attr.get("attributePRsToAgent"):
+    print(f"FAIL cli-config attribution enabled: {attr}")
+    sys.exit(1)
+print("OK  ~/.cursor/cli-config.json unrestricted + attribution off")
 PY
   [[ $? -eq 0 ]] || FAIL=1
 else
   bad "missing ~/.cursor/cli-config.json"
+fi
+
+# Git history: no agent Co-authored-by on any commit
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  AGENT_CO=$(git log --format='%H' | python3 -c "
+import re, subprocess, sys
+pat = re.compile(r'^Co-authored-by:', re.I)
+agents = re.compile(r'cursor|cursoragent|copilot|claude|anthropic|openai|\[bot\]', re.I)
+bad = []
+for h in sys.stdin.read().split():
+    msg = subprocess.run(['git','log','-1','--format=%B',h],capture_output=True,text=True).stdout
+    for ln in msg.splitlines():
+        if pat.match(ln) and agents.search(ln):
+            bad.append(f'{h[:7]} {ln.strip()}')
+            break
+if bad:
+    print('Agent Co-authored-by found on', len(bad), 'commit(s):')
+    print(chr(10).join(bad[:5]))
+    if len(bad) > 5:
+        print('...')
+    sys.exit(1)
+print('OK  git history has no agent Co-authored-by trailers')
+" 2>/dev/null)
+  if [[ $? -eq 0 ]]; then
+    ok "git history clean of agent co-authors"
+  else
+    echo "$AGENT_CO"
+    bad "agent Co-authored-by in git history — run ./scripts/strip-agent-coauthors-from-history.sh"
+  fi
 fi
 
 # Composer Run Everything flag

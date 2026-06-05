@@ -44,8 +44,12 @@ perms["deny"] = perms.get("deny") or []
 sandbox = data.setdefault("sandbox", {})
 sandbox["mode"] = "disabled"
 sandbox["networkAccess"] = "allow_all"
+data["attribution"] = {
+    "attributeCommitsToAgent": False,
+    "attributePRsToAgent": False,
+}
 path.write_text(json.dumps(data, indent=2) + "\n")
-print(f"Updated {path}")
+print(f"Updated {path} (attribution disabled)")
 PY
 else
   echo "Skip cli-config.json (missing — open Cursor once to create it)" >&2
