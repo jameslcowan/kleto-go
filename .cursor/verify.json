@@ -1,9 +1,9 @@
 {
   "commands": [
     {
-      "name": "cursor-autonomy",
-      "run": "./scripts/verify-cursor-autonomy.sh",
-      "timeout": 60
+      "name": "agent-attribution",
+      "run": "bash -c 'source .cursor/hooks/lib/agent-attribution.sh && c=$(agent_attribution_count) && test \"${c:-0}\" -eq 0'",
+      "timeout": 30
     }
   ]
 }

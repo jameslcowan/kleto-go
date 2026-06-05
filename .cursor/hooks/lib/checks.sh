@@ -134,6 +134,8 @@ PY
 
 _issue() {
   local kind="$1" title="$2" action="$3" detail="$4"
+  # Single-line records for verify-stop.py (newlines escaped)
+  detail="${detail//$'\n'/\\n}"
   CHECK_ISSUES+=("${kind}|${title}|${action}|${detail}")
 }
 

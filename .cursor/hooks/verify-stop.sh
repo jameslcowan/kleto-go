@@ -51,7 +51,7 @@ for line in issues:
     kind = parts[0] if parts else "ISSUE"
     title = parts[1] if len(parts) > 1 else line
     action = parts[2] if len(parts) > 2 else ""
-    detail = parts[3] if len(parts) > 3 else ""
+    detail = (parts[3] if len(parts) > 3 else "").replace("\\n", "\n")
     blocks.append(f"## {kind}: {title}\n{action}\n\n{detail}".strip())
 
 msg = (
