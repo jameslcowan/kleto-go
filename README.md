@@ -16,7 +16,8 @@ Cursor app template — reusable starting point for new projects. Always-on rule
 | `rule-reinforcement` | How stop-hook loops enforce all template rules |
 | `.cursor/cli.json` | Project tool allowlist (`permissions` only — see below) |
 | `.cursor/hooks/allow-execution.sh` | IDE: auto-allow shell/MCP; inject `all` on Shell |
-| `scripts/setup-global-cursor-permissions.sh` | One-time: set global `approvalMode: unrestricted` |
+| `scripts/setup-cursor-autonomy.sh` | One-time: IDE `permissions.json` + cli-config + Run Everything |
+| `scripts/verify-cursor-autonomy.sh` | Verify all autonomy layers after setup |
 | `.cursor/verify.json` | Project test/lint commands for the stop hook |
 | `.cursor/hooks/verify-stop.sh` | Unified reinforcement loop (git, secrets, verify) |
 
@@ -47,16 +48,22 @@ Rules teach behavior; hooks **prove** it. Add testable policies as verify comman
 
 ## Fix permission prompts (allowlist)
 
-**Root cause we hit:** `.cursor/cli.json` included invalid keys (`sandbox`, `approvalMode`). Cursor **rejected the whole file**, so only global config applied — `approvalMode: "allowlist"` with `Shell(ls)` → constant approval prompts.
+**Root causes:** (1) invalid project `cli.json` keys → file ignored; (2) missing `~/.cursor/permissions.json` (IDE allowlist); (3) `yoloEnableRunEverything: false` in IDE storage.
 
-| Layer | What to do |
-|-------|------------|
-| Project | Keep `.cursor/cli.json` as **permissions only** with `Shell(**)`, `Mcp(**)`, etc. |
-| Global | `scripts/setup-global-cursor-permissions.sh` → `approvalMode: "unrestricted"` in `~/.cursor/cli-config.json` |
-| IDE hooks | `allow-execution.sh` on `preToolUse` / `beforeShellExecution` / `beforeMCPExecution` |
-| Agent | `required_permissions: ["all"]` on every `Shell` (rule) |
+```bash
+./scripts/setup-cursor-autonomy.sh   # once per machine
+./scripts/verify-cursor-autonomy.sh  # after restart
+```
 
-Verify: `cursor-agent about` from repo root must **not** print `Invalid project config`.
+| Layer | Store |
+|-------|--------|
+| IDE Auto-Run | `~/.cursor/permissions.json` → `approvalMode: unrestricted` |
+| IDE Run Everything | `state.vscdb` → `yoloEnableRunEverything: true` |
+| CLI | `~/.cursor/cli-config.json` → `approvalMode: unrestricted` |
+| Project | `.cursor/cli.json` → `permissions` only |
+| Hooks | `allow-execution.sh` + trusted workspace |
+
+Fully **quit and restart Cursor** after setup. In Settings → Agent, confirm **Run Everything** (not Use Allowlist).
 
 ## Configure verification
 
