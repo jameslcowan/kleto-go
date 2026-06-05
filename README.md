@@ -65,6 +65,18 @@ Rules teach behavior; hooks **prove** it. Add testable policies as verify comman
 
 Fully **quit and restart Cursor** after setup. In Settings → Agent, confirm **Run Everything** (not Use Allowlist).
 
+## No agent attribution on GitHub
+
+Cursor was adding `Co-authored-by: Cursor <cursoragent@cursor.com>` when `attributeCommitsToAgent` was enabled in `~/.cursor/cli-config.json`.
+
+```bash
+./scripts/setup-cursor-autonomy.sh          # sets attribution off
+./scripts/verify-cursor-autonomy.sh         # checks config + git history
+./scripts/strip-agent-coauthors-from-history.sh  # one-time history cleanup (no remotes)
+```
+
+Rule: `no-agent-attribution` — human-only commits; stop hook blocks agent trailers on HEAD.
+
 ## Configure verification
 
 Edit `.cursor/verify.json` when you add a stack:
