@@ -1,0 +1,40 @@
+---
+description: Run project verification before ending a turn; fix failures before claiming done
+alwaysApply: true
+---
+
+# Verify before done
+
+Do not end a turn or tell the user work is complete while verification is failing.
+
+## Project verify config
+
+Commands live in `.cursor/verify.json`:
+
+```json
+{
+  "commands": [
+    { "name": "test", "run": "go test ./...", "timeout": 120 },
+    { "name": "lint", "run": "npm run lint", "optional": true }
+  ]
+}
+```
+
+- `name` — label in hook output
+- `run` — shell command (repo root)
+- `timeout` — seconds (default 300)
+- `optional` — failure does not block (default false)
+
+Empty `commands` is valid for a fresh template; add entries when the app has a test/lint script.
+
+## Agent duties
+
+After substantive code changes:
+
+1. Run each non-optional command (or rely on the stop hook to force a retry loop).
+2. Fix root cause; micro-commit fixes.
+3. Re-run until green.
+
+## Stop hook
+
+`.cursor/hooks/verify-stop.sh` runs on every agent turn end. Failures auto-submit a follow-up (see rule-reinforcement). A clean tree with passing verify commands returns `{}` and stops the loop.

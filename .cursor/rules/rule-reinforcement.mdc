@@ -1,0 +1,32 @@
+---
+description: Stop-hook loops reinforce all template rules — respond to follow-ups without asking
+alwaysApply: true
+---
+
+# Rule reinforcement loops
+
+Template rules are enforced twice: **always-on rules** (model context) and **stop-hook loops** (deterministic).
+
+## How loops work
+
+1. Agent turn completes → `verify-stop.sh` runs.
+2. Checks: uncommitted git, staged secrets, `.cursor/verify.json` commands.
+3. On failure → `followup_message` is auto-submitted (up to `loop_limit` in `hooks.json`).
+4. Agent fixes issues **without asking** permission or whether to commit.
+5. When all checks pass → hook returns `{}` → turn can end.
+
+## On follow-up messages
+
+Treat stop-hook output as a hard gate, not a suggestion:
+
+- Use `Shell` with `required_permissions: ["all"]`.
+- Micro-commit each fix step.
+- Re-run failed verify commands.
+- Do not ask “should I continue?” — continue until checks pass or you are blocked by a real external dependency.
+
+## Adding checks
+
+- **Verify commands** — edit `.cursor/verify.json` per stack.
+- **New rule files** — add always-on `.mdc` under `.cursor/rules/` and list them in the hook footer in `hooks/lib/checks.sh` (`rule_reinforcement_footer`) so loops remind agents of new policies.
+
+Hooks cannot replace rules for subjective quality (naming, architecture); pair new rules with verify commands when behavior is testable.
