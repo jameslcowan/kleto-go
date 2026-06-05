@@ -75,7 +75,7 @@ Cursor was adding `Co-authored-by: Cursor <cursoragent@cursor.com>` when `attrib
 ./scripts/strip-agent-coauthors-from-history.sh  # one-time history cleanup (no remotes)
 ```
 
-Rule: `no-agent-attribution` — human-only commits; stop hook blocks agent trailers on HEAD.
+Rule + skill: `no-agent-attribution`, `.cursor/skills/fix-agent-attribution/` — stop hook **auto-rewrites** polluted history when the tree is clean (loop), then verifies.
 
 ## Configure verification
 
