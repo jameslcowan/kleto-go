@@ -8,12 +8,15 @@ Cursor app template — reusable starting point for new projects. Always-on rule
 |---------------|---------|
 | `micro-commits` | Auto-commit each step; one concern; small diffs |
 | `git-safety` | Safe git; micro-commit always; push only when asked |
+| `allowlist-config` | Valid `cli.json`; global `unrestricted`; why prompts happen |
 | `project-full-access` | Every `Shell` uses `required_permissions: ["all"]`; never ask |
 | `agent-workflow` | Template rules override conflicting global user rules |
 | `coding-principles` | Small diffs, match conventions |
 | `verify-before-done` | Run `.cursor/verify.json` commands before claiming done |
 | `rule-reinforcement` | How stop-hook loops enforce all template rules |
-| `.cursor/cli.json` | CLI: sandbox off, broad tool allowlist |
+| `.cursor/cli.json` | Project tool allowlist (`permissions` only — see below) |
+| `.cursor/hooks/allow-execution.sh` | IDE: auto-allow shell/MCP; inject `all` on Shell |
+| `scripts/setup-global-cursor-permissions.sh` | One-time: set global `approvalMode: unrestricted` |
 | `.cursor/verify.json` | Project test/lint commands for the stop hook |
 | `.cursor/hooks/verify-stop.sh` | Unified reinforcement loop (git, secrets, verify) |
 
@@ -41,6 +44,19 @@ flowchart LR
 | Footer checklist | `project-full-access`, all always-on rules |
 
 Rules teach behavior; hooks **prove** it. Add testable policies as verify commands; add subjective policies as rules plus footer reminders.
+
+## Fix permission prompts (allowlist)
+
+**Root cause we hit:** `.cursor/cli.json` included invalid keys (`sandbox`, `approvalMode`). Cursor **rejected the whole file**, so only global config applied — `approvalMode: "allowlist"` with `Shell(ls)` → constant approval prompts.
+
+| Layer | What to do |
+|-------|------------|
+| Project | Keep `.cursor/cli.json` as **permissions only** with `Shell(**)`, `Mcp(**)`, etc. |
+| Global | `scripts/setup-global-cursor-permissions.sh` → `approvalMode: "unrestricted"` in `~/.cursor/cli-config.json` |
+| IDE hooks | `allow-execution.sh` on `preToolUse` / `beforeShellExecution` / `beforeMCPExecution` |
+| Agent | `required_permissions: ["all"]` on every `Shell` (rule) |
+
+Verify: `cursor-agent about` from repo root must **not** print `Invalid project config`.
 
 ## Configure verification
 
