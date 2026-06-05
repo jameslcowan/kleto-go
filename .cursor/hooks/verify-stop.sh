@@ -19,6 +19,7 @@ fi
 CHECK_ISSUES=()
 check_git_clean
 check_staged_secrets
+check_agent_attribution
 check_project_verify ".cursor/verify.json"
 
 if [[ ${#CHECK_ISSUES[@]} -eq 0 ]]; then

@@ -30,6 +30,36 @@ check_staged_secrets() {
   fi
 }
 
+check_agent_attribution() {
+  if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    return 0
+  fi
+  local hits
+  hits=$(git log --format='%H %s' | python3 -c "
+import re, subprocess, sys
+pat = re.compile(r'^Co-authored-by:', re.I)
+agents = re.compile(
+    r'cursor|cursoragent|copilot|claude|anthropic|openai|github-actions|dependabot|\[bot\]',
+    re.I,
+)
+log = subprocess.run(['git', 'log', '-1', '--format=%H'], capture_output=True, text=True)
+head = (log.stdout or '').strip()
+if not head:
+    sys.exit(0)
+msg = subprocess.run(['git', 'log', '-1', '--format=%B', head], capture_output=True, text=True).stdout
+bad = [ln for ln in msg.splitlines() if pat.match(ln) and agents.search(ln)]
+if bad:
+    print(head[:12])
+    print('\n'.join(bad))
+" 2>/dev/null || true)
+  if [[ -n "$hits" ]]; then
+    _issue "AGENT_COAUTHOR" \
+      "HEAD commit has agent Co-authored-by (no-agent-attribution.mdc)." \
+      "Disable Cursor attribution in cli-config; run ./scripts/strip-agent-coauthors-from-history.sh if needed; amend or rewrite — never push agent trailers to GitHub." \
+      "$hits"
+  fi
+}
+
 check_project_verify() {
   local config="${1:-.cursor/verify.json}"
   [[ -f "$config" ]] || return 0
@@ -100,7 +130,8 @@ Rule reinforcement (template overrides global user rules):
 - allowlist-config: valid .cursor/cli.json (permissions only); global unrestricted optional
 - project-full-access: every Shell uses required_permissions ["all"]; never ask permission
 - micro-commits: one concern per commit; working tree clean before stop
-- git-safety: no secrets in commits; no force-push unless user asked
+- git-safety: no secrets; no agent Co-authored-by; no force-push unless user asked
+- no-agent-attribution: attributeCommitsToAgent false; human-only commits
 - coding-principles: minimal diff; match conventions
 - verify-before-done: all .cursor/verify.json commands must pass
 EOF
