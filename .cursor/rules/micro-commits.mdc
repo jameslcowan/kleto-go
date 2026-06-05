@@ -1,0 +1,59 @@
+---
+description: Atomic micro-commits — one concern per commit, minimal diffs for AI context
+alwaysApply: true
+---
+
+# Micro-commits
+
+Every change must land as **granular micro-commits**. Small commits keep git history and agent context windows usable across models and sessions.
+
+## One concern per commit
+
+Each commit must represent exactly **one** logical unit of work:
+
+- A single bug fix
+- One function or method added or changed
+- One file’s formatting-only change (never mixed with behavior)
+- One dependency add or bump
+- One test case or one test file
+
+Never combine unrelated work (e.g. feature + refactor + unrelated cleanup) in one commit.
+
+## Keep diffs small
+
+- Prefer **one to three files** per commit when possible.
+- If a change must touch more files, split into a **sequence** of commits (types → implementation → tests → wiring).
+- Avoid drive-by edits in files you are not committing for that step.
+
+## Commit cadence during agent work
+
+When implementing a multi-step task:
+
+1. Complete one micro-step.
+2. Stage only files for that step.
+3. Commit with a message that describes **only** that step.
+4. Repeat — do not accumulate a large uncommitted diff.
+
+Natural breakpoints: after scaffolding, after core logic, after tests, after integration.
+
+## Commit messages
+
+- One short subject line (imperative, ≤72 chars).
+- Optional body only if the *why* is not obvious from the subject.
+- Match the repo’s existing message style when examples exist.
+
+## When the user has not asked to commit
+
+Do not create commits unless the user requests them **or** an active rule/session explicitly requires micro-commits for that task. When commits are requested, still follow micro-commit granularity — never one giant commit for a whole feature.
+
+## Examples
+
+```
+# ✅ GOOD — three commits for one small feature
+fix(auth): return 401 when token is expired
+feat(auth): add JWT expiry check in middleware
+test(auth): cover expired token in middleware_test.go
+
+# ❌ BAD — one commit mixing concerns
+feat(auth): add expiry check, refactor user store, update README
+```

@@ -1,0 +1,32 @@
+---
+description: Safe git practices — no destructive ops, no secrets, commits only when asked
+alwaysApply: true
+---
+
+# Git safety
+
+## Commits
+
+- Create commits **only** when the user explicitly asks, unless another rule for the session requires commits (e.g. micro-commits during an instructed commit workflow).
+- Never commit files that likely contain secrets (`.env`, credentials, keys, tokens).
+- Never skip hooks (`--no-verify`, `--no-gpg-sign`) unless the user explicitly requests it.
+
+## Forbidden unless explicitly requested
+
+- `git push --force` (especially to `main` / `master`)
+- `git reset --hard` and other irreversible history rewrites
+- `git commit --amend` unless: user asked for amend, HEAD is your unpushed commit, and the prior commit succeeded without hook rejections
+- Updating `git config`
+- Interactive git flags (`-i`) — not supported in agent environments
+
+## Pull requests and remote
+
+- Use `gh` for GitHub operations when available.
+- Do not push to remote unless the user asks.
+- When creating PRs, summarize **all** commits on the branch, not only the latest.
+
+## Commit workflow
+
+When committing: check `git status`, `git diff`, and recent `git log` for message style; stage only relevant files; use a HEREDOC for multi-line messages; verify with `git status` after commit.
+
+If a hook fails or rejects the commit, fix the issue and make a **new** commit — do not amend a failed commit.

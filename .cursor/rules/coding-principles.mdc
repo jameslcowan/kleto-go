@@ -1,0 +1,36 @@
+---
+description: Default implementation discipline — small diffs, match conventions, useful tests only
+alwaysApply: true
+---
+
+# Coding principles
+
+## Minimize scope
+
+- Use the smallest correct diff. Do not change unrelated code.
+- A focused five-line fix beats a large incidental refactor.
+
+## Avoid over-engineering
+
+- No premature abstractions or one-off helpers.
+- No excessive error handling for impossible or extremely unlikely paths.
+
+## Match the codebase
+
+- Read surrounding code before editing. Match naming, types, imports, and documentation level.
+- Reuse existing functions and patterns instead of duplicating logic.
+
+## Comments
+
+- Prefer self-explanatory code.
+- Comment only non-obvious business logic or subtle technical constraints.
+
+## Tests
+
+- Add tests when requested or when they meaningfully cover real behavior.
+- Skip tests that only assert the obvious.
+
+## Communication
+
+- Use code citation blocks (`startLine:endLine:filepath`) when referencing existing code.
+- Keep responses proportional to task complexity.

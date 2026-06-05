@@ -1,0 +1,26 @@
+---
+description: How agents should work in this repo — investigate, execute, respect user rules
+alwaysApply: true
+---
+
+# Agent workflow
+
+## Environment
+
+- This is a real environment: run commands and use tools to investigate; do not give up after one failure.
+- Read relevant skills (`.cursor/skills/`, user skills) when they apply — follow them fully.
+
+## Execution
+
+- Prefer matching existing project conventions over generic best practices when they conflict.
+- For multi-step implementation, plan the micro-commit sequence before large edits (see micro-commits rule).
+- Run linters/tests when appropriate after substantive changes.
+
+## User rules
+
+- User rules and skills override generic habits when they conflict.
+- Do not commit, push, or open PRs unless the user (or an explicit session rule) asks.
+
+## Template usage
+
+When copied into a new app repo, keep these always-on rules. Add project-specific rules under `.cursor/rules/` with `globs` or additional `alwaysApply` files as needed — one concern per rule file, under ~50 lines each.
