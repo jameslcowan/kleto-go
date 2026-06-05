@@ -1,0 +1,38 @@
+---
+description: Never attribute or co-author git commits/PRs to Cursor or any AI agent
+alwaysApply: true
+---
+
+# No agent attribution
+
+All git commits and PRs are **human-only**. Never add agent attribution.
+
+## Forbidden in commits
+
+- `Co-authored-by: Cursor <cursoragent@cursor.com>` or any Cursor/agent trailer
+- `git commit --trailer` for agent co-authors
+- `Signed-off-by` / `Assisted-by` naming agents, bots, or Copilot
+
+Author/committer must remain the human user only.
+
+## Cursor settings
+
+Global `~/.cursor/cli-config.json` must have:
+
+```json
+"attribution": {
+  "attributeCommitsToAgent": false,
+  "attributePRsToAgent": false
+}
+```
+
+Run `./scripts/setup-cursor-autonomy.sh` after Cursor updates reset this.
+
+## Enforcement
+
+- `verify-cursor-autonomy.sh` checks config and git history
+- `verify-stop` hook flags commits with agent `Co-authored-by` trailers
+
+## PRs
+
+Do not enable "attribute PR to agent" in Cursor. PR descriptions must not credit agents as co-authors.
